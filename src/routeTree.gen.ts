@@ -11,22 +11,23 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
+import { Route as EnvironmentsEnvironmentIdFeaturesImport } from './routes/environments/$environmentId/features'
 
 // Create/Update Routes
-
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const EnvironmentsEnvironmentIdFeaturesRoute =
+  EnvironmentsEnvironmentIdFeaturesImport.update({
+    id: '/environments/$environmentId/features',
+    path: '/environments/$environmentId/features',
+    getParentRoute: () => rootRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -39,11 +40,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
+    '/environments/$environmentId/features': {
+      id: '/environments/$environmentId/features'
+      path: '/environments/$environmentId/features'
+      fullPath: '/environments/$environmentId/features'
+      preLoaderRoute: typeof EnvironmentsEnvironmentIdFeaturesImport
       parentRoute: typeof rootRoute
     }
   }
@@ -53,37 +54,38 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/environments/$environmentId/features'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/environments/$environmentId/features'
+  id: '__root__' | '/' | '/environments/$environmentId/features'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  EnvironmentsEnvironmentIdFeaturesRoute: typeof EnvironmentsEnvironmentIdFeaturesRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  EnvironmentsEnvironmentIdFeaturesRoute:
+    EnvironmentsEnvironmentIdFeaturesRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +99,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/environments/$environmentId/features"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/environments/$environmentId/features": {
+      "filePath": "environments/$environmentId/features.tsx"
     }
   }
 }

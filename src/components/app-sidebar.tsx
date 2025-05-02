@@ -1,28 +1,66 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link } from "@tanstack/react-router";
-import { ChevronRight, Command, PlusIcon } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Command, PlusIcon } from "lucide-react";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { Skeleton } from "./ui/skeleton";
+import { useEffect, useState } from "react";
+import { projectsQueryOptions } from "@/services/projects";
+import { environmentsQueryOptions } from "@/services/environments";
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
+  const { data: projects, isPending: isProjectsPending } = useSuspenseQuery(
+    projectsQueryOptions()
+  );
+  const {
+    data: environments,
+    refetch: fetchEnvironments,
+    isPending: isEnvironmentsPending,
+  } = useQuery(environmentsQueryOptions(selectedProject));
+
+  useEffect(() => {
+    if (projects && projects.length > 0) {
+      setSelectedProject(projects[0].id);
+    }
+  }, [projects]);
+
+  useEffect(() => {
+    if (environments && environments.length > 0) {
+      setSelectedEnvironment(environments[0].id);
+    }
+  }, [environments]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      fetchEnvironments();
+    }
+  }, [selectedProject]);
+
+  useEffect(() => {
+    if (selectedEnvironment) {
+      navigate({
+        to: "/environments/$environmentId/features",
+        params: { environmentId: selectedEnvironment },
+      });
+    }
+  }, [selectedEnvironment]);
+
   return (
     <Sidebar variant="floating" collapsible="offcanvas">
       <SidebarHeader>
@@ -51,41 +89,68 @@ export function AppSidebar() {
             <span className="sr-only">Add</span>
           </SidebarGroupAction>
           <SidebarMenu>
-            <Collapsible defaultOpen className="group/collapsible">
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <span>test v project 1</span>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction className="data-[state=open]:rotate-90">
-                    <ChevronRight />
-                    <span className="sr-only">Toggle</span>
-                  </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarGroup>
-                    <SidebarGroupLabel>Environments</SidebarGroupLabel>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <span>QA</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <span>Staging</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <span>Prod</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </SidebarGroup>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+            {isProjectsPending && (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-6"></Skeleton>
+                <Skeleton className="h-6"></Skeleton>
+                <Skeleton className="h-6"></Skeleton>
+                <Skeleton className="h-6"></Skeleton>
+                <Skeleton className="h-6"></Skeleton>
+              </div>
+            )}
+            {projects &&
+              projects.length > 0 &&
+              projects.map((project: any) => (
+                <Collapsible
+                  key={project.id}
+                  className="group/collapsible"
+                  open={selectedProject === project.id}
+                  onOpenChange={() => setSelectedProject(project.id)}
+                >
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={project.id === selectedProject}
+                      onClick={() => setSelectedProject(project.id)}
+                    >
+                      <span>{project.name}</span>
+                    </SidebarMenuButton>
+                    <CollapsibleContent>
+                      <SidebarGroup>
+                        <SidebarGroupLabel>Environments</SidebarGroupLabel>
+                        <SidebarMenuSub>
+                          {isEnvironmentsPending && (
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-6"></Skeleton>
+                              <Skeleton className="h-6"></Skeleton>
+                              <Skeleton className="h-6"></Skeleton>
+                              <Skeleton className="h-6"></Skeleton>
+                              <Skeleton className="h-6"></Skeleton>
+                            </div>
+                          )}
+                          {environments &&
+                            environments.length > 0 &&
+                            environments.map((environment: any) => (
+                              <SidebarMenuSubItem key={environment.id}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={
+                                    environment.id === selectedEnvironment
+                                  }
+                                  onClick={() =>
+                                    setSelectedEnvironment(environment.id)
+                                  }
+                                >
+                                  <span>{environment.name}</span>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                        </SidebarMenuSub>
+                      </SidebarGroup>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

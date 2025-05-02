@@ -12,7 +12,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { Command, PlusIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -23,6 +23,10 @@ import { environmentsQueryOptions } from "@/services/environments";
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const { projectId, environmentId } = useParams({
+    strict: false,
+  });
+  const [isProjectChanged, setIsProjectChanged] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
   const { data: projects, isPending: isProjectsPending } = useSuspenseQuery(
@@ -42,7 +46,10 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (environments && environments.length > 0) {
-      setSelectedEnvironment(environments[0].id);
+      if (isProjectChanged) {
+        setSelectedEnvironment(environments[0].id);
+        setIsProjectChanged(false);
+      }
     }
   }, [environments]);
 
@@ -53,13 +60,33 @@ export function AppSidebar() {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (selectedEnvironment) {
+    if (selectedProject && selectedEnvironment) {
       navigate({
-        to: "/environments/$environmentId/features",
-        params: { environmentId: selectedEnvironment },
+        to: "/projects/$projectId/environments/$environmentId/features",
+        params: {
+          projectId: selectedProject,
+          environmentId: selectedEnvironment,
+        },
       });
     }
-  }, [selectedEnvironment]);
+  }, [selectedProject, selectedEnvironment]);
+
+  useEffect(() => {
+    if (environmentId) {
+      setSelectedEnvironment(environmentId);
+    }
+  }, [environmentId]);
+
+  useEffect(() => {
+    if (projectId) {
+      setSelectedProject(projectId);
+    }
+  }, [projectId]);
+
+  const handleSelectProject = (projectId: string) => {
+    setSelectedProject(projectId);
+    setIsProjectChanged(true);
+  };
 
   return (
     <Sidebar variant="floating" collapsible="offcanvas">
@@ -67,7 +94,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link to="/">
+              <div className="flex flex-row">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
@@ -76,7 +103,7 @@ export function AppSidebar() {
                     Modulyn
                   </span>
                 </div>
-              </Link>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -105,13 +132,13 @@ export function AppSidebar() {
                   key={project.id}
                   className="group/collapsible"
                   open={selectedProject === project.id}
-                  onOpenChange={() => setSelectedProject(project.id)}
+                  onOpenChange={() => handleSelectProject(project.id)}
                 >
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
                       isActive={project.id === selectedProject}
-                      onClick={() => setSelectedProject(project.id)}
+                      onClick={() => handleSelectProject(project.id)}
                     >
                       <span>{project.name}</span>
                     </SidebarMenuButton>
@@ -141,7 +168,15 @@ export function AppSidebar() {
                                     setSelectedEnvironment(environment.id)
                                   }
                                 >
-                                  <span>{environment.name}</span>
+                                  <Link
+                                    to="/projects/$projectId/environments/$environmentId/features"
+                                    params={{
+                                      projectId: selectedProject,
+                                      environmentId: environment.id,
+                                    }}
+                                  >
+                                    <span>{environment.name}</span>
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}

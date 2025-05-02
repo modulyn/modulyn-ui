@@ -1,13 +1,15 @@
+import { FeatureCard } from "@/components/feature-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { featuresQueryOptions } from "@/services/features";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, PlusIcon } from "lucide-react";
 
-export const Route = createFileRoute("/environments/$environmentId/features")({
+export const Route = createFileRoute(
+  "/projects/$projectId/environments/$environmentId/features"
+)({
   component: FeaturesComponent,
   errorComponent: FeaturesErrorComponent,
   pendingComponent: FeaturesPendingComponent,
@@ -42,13 +44,13 @@ function FeaturesPendingComponent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 mt-2 pl-2 pr-4">
-        <Skeleton className="h-24"></Skeleton>
-        <Skeleton className="h-24"></Skeleton>
-        <Skeleton className="h-24"></Skeleton>
-        <Skeleton className="h-24"></Skeleton>
-        <Skeleton className="h-24"></Skeleton>
-        <Skeleton className="h-24"></Skeleton>
+      <div className="grid grid-cols-3 gap-2 mt-2 pl-2 pr-4">
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
       </div>
     </div>
   );
@@ -71,18 +73,15 @@ function FeaturesComponent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 mt-2">
-        {data.map((project: any) => (
-          <Card key={project.id}>
-            <CardContent>
-              <div>
-                Name: <span key={project.id}>{project.name}</span>
-              </div>
-              <div>
-                Name: <span key={project.id}>{project.name}</span>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-3 gap-2 mt-2">
+        {data.map((feature) => (
+          <FeatureCard
+            key={feature.id}
+            id={feature.id}
+            name={feature.name}
+            enabled={feature.enabled}
+            updatedAt={feature.updatedAt}
+          />
         ))}
       </div>
     </div>

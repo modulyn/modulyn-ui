@@ -5,6 +5,7 @@ import { queryOptions } from "@tanstack/react-query";
 type EnvironmentType = {
   id: string;
   name: string;
+  projectId: string;
 };
 
 const fetchEnvironments = async (projectId: string) => {
@@ -12,7 +13,14 @@ const fetchEnvironments = async (projectId: string) => {
     .get<
       Response<EnvironmentType>
     >(`http://localhost:8080/api/v1/environments?project_id=${projectId}`)
-    .then((r) => r.data.data);
+    .then((r) =>
+      r.data.data.map((d) => {
+        return {
+          ...d,
+          projectId: projectId,
+        };
+      })
+    );
 };
 
 export const environmentsQueryOptions = (projectId: string) =>

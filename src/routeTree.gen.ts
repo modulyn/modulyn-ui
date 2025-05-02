@@ -12,7 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as EnvironmentsEnvironmentIdFeaturesImport } from './routes/environments/$environmentId/features'
+import { Route as ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesImport } from './routes/projects/$projectId/environments/$environmentId/features'
 
 // Create/Update Routes
 
@@ -22,10 +22,10 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const EnvironmentsEnvironmentIdFeaturesRoute =
-  EnvironmentsEnvironmentIdFeaturesImport.update({
-    id: '/environments/$environmentId/features',
-    path: '/environments/$environmentId/features',
+const ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute =
+  ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesImport.update({
+    id: '/projects/$projectId/environments/$environmentId/features',
+    path: '/projects/$projectId/environments/$environmentId/features',
     getParentRoute: () => rootRoute,
   } as any)
 
@@ -40,11 +40,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/environments/$environmentId/features': {
-      id: '/environments/$environmentId/features'
-      path: '/environments/$environmentId/features'
-      fullPath: '/environments/$environmentId/features'
-      preLoaderRoute: typeof EnvironmentsEnvironmentIdFeaturesImport
+    '/projects/$projectId/environments/$environmentId/features': {
+      id: '/projects/$projectId/environments/$environmentId/features'
+      path: '/projects/$projectId/environments/$environmentId/features'
+      fullPath: '/projects/$projectId/environments/$environmentId/features'
+      preLoaderRoute: typeof ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesImport
       parentRoute: typeof rootRoute
     }
   }
@@ -54,38 +54,41 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
+  '/projects/$projectId/environments/$environmentId/features': typeof ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
+  '/projects/$projectId/environments/$environmentId/features': typeof ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/environments/$environmentId/features': typeof EnvironmentsEnvironmentIdFeaturesRoute
+  '/projects/$projectId/environments/$environmentId/features': typeof ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/environments/$environmentId/features'
+  fullPaths: '/' | '/projects/$projectId/environments/$environmentId/features'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/environments/$environmentId/features'
-  id: '__root__' | '/' | '/environments/$environmentId/features'
+  to: '/' | '/projects/$projectId/environments/$environmentId/features'
+  id:
+    | '__root__'
+    | '/'
+    | '/projects/$projectId/environments/$environmentId/features'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EnvironmentsEnvironmentIdFeaturesRoute: typeof EnvironmentsEnvironmentIdFeaturesRoute
+  ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute: typeof ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EnvironmentsEnvironmentIdFeaturesRoute:
-    EnvironmentsEnvironmentIdFeaturesRoute,
+  ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute:
+    ProjectsProjectIdEnvironmentsEnvironmentIdFeaturesRoute,
 }
 
 export const routeTree = rootRoute
@@ -99,14 +102,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/environments/$environmentId/features"
+        "/projects/$projectId/environments/$environmentId/features"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/environments/$environmentId/features": {
-      "filePath": "environments/$environmentId/features.tsx"
+    "/projects/$projectId/environments/$environmentId/features": {
+      "filePath": "projects/$projectId/environments/$environmentId/features.tsx"
     }
   }
 }

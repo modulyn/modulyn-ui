@@ -25,8 +25,10 @@ import { Skeleton } from "./ui/skeleton";
 import { useEffect, useState } from "react";
 import { projectsQueryOptions } from "@/services/projects";
 import { environmentsQueryOptions } from "@/services/environments";
+import { NewProject } from "./new-project";
 
 export function AppSidebar() {
+  const [openNewProject, setOpenNewProject] = useState(false);
   const navigate = useNavigate();
   const { projectId, environmentId, featureId } = useParams({
     strict: false,
@@ -117,7 +119,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction>
+          <SidebarGroupAction onClick={() => setOpenNewProject(true)}>
             <PlusIcon />
             <span className="sr-only">Add</span>
           </SidebarGroupAction>
@@ -195,6 +197,12 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      {openNewProject && (
+        <NewProject
+          open={openNewProject}
+          onOpenChange={() => setOpenNewProject(!openNewProject)}
+        />
+      )}
     </Sidebar>
   );
 }

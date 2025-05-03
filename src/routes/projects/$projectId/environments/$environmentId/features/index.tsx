@@ -1,4 +1,7 @@
 import { FeatureCard } from "@/components/feature-card";
+import { NewEnvironment } from "@/components/new-environment";
+import { NewFeature } from "@/components/new-feature";
+import { NewProject } from "@/components/new-project";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,6 +9,7 @@ import { featuresQueryOptions } from "@/services/features";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, PlusIcon } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute(
   "/projects/$projectId/environments/$environmentId/features/"
@@ -54,6 +58,8 @@ function FeaturesPendingComponent() {
 }
 
 function FeaturesComponent() {
+  const [openNewEnvironment, setOpenNewEnvironment] = useState(false);
+  const [openNewFeature, setOpenNewFeature] = useState(false);
   const { environmentId, projectId } = Route.useParams();
   const navigate = useNavigate();
   const { data } = useSuspenseQuery(featuresQueryOptions(environmentId));
@@ -74,10 +80,10 @@ function FeaturesComponent() {
       <div className="flex flex-row justify-between gap-2 my-2">
         <div className="text-2xl">Features</div>
         <div className="flex flex-row gap-2">
-          <Button>
+          <Button onClick={() => setOpenNewEnvironment(true)}>
             <PlusIcon /> Add Environment
           </Button>
-          <Button>
+          <Button onClick={() => setOpenNewFeature(true)}>
             <PlusIcon /> Add Feature
           </Button>
         </div>
@@ -95,6 +101,20 @@ function FeaturesComponent() {
           />
         ))}
       </div>
+
+      {openNewEnvironment && (
+        <NewEnvironment
+          open={openNewEnvironment}
+          onOpenChange={() => setOpenNewEnvironment(!openNewEnvironment)}
+        />
+      )}
+
+      {openNewFeature && (
+        <NewFeature
+          open={openNewFeature}
+          onOpenChange={() => setOpenNewFeature(!openNewFeature)}
+        />
+      )}
     </>
   );
 }

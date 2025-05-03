@@ -17,6 +17,11 @@ type UpdateFeatureType = {
   value: boolean;
 };
 
+type CreateFeatureType = {
+  name: string;
+  projectId: string;
+};
+
 // get features
 const fetchFeatures = async (environmentId: string) => {
   return axios
@@ -66,4 +71,22 @@ export const featureQueryOptions = (environmentId: string, featureId: string) =>
   queryOptions({
     queryKey: ["environment", environmentId, "feature", featureId],
     queryFn: () => fetchFeature(environmentId, featureId),
+  });
+
+// create feature
+const createFeature = async (input: CreateFeatureType) => {
+  return axios.post(`http://localhost:8080/api/v1/environment`, input, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+export const featureCreateMutation = (environmentId: string) =>
+  useMutation({
+    mutationFn: (input: CreateFeatureType) => createFeature(input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["features", environmentId],
+      }),
   });

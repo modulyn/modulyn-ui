@@ -1,7 +1,6 @@
 import { FeatureCard } from "@/components/feature-card";
 import { NewEnvironment } from "@/components/new-environment";
 import { NewFeature } from "@/components/new-feature";
-import { NewProject } from "@/components/new-project";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,6 +51,15 @@ function FeaturesPendingComponent() {
         <Skeleton className="h-22"></Skeleton>
         <Skeleton className="h-22"></Skeleton>
         <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
+        <Skeleton className="h-22"></Skeleton>
       </div>
     </>
   );
@@ -60,9 +68,11 @@ function FeaturesPendingComponent() {
 function FeaturesComponent() {
   const [openNewEnvironment, setOpenNewEnvironment] = useState(false);
   const [openNewFeature, setOpenNewFeature] = useState(false);
-  const { environmentId, projectId } = Route.useParams();
+  const { projectId, environmentId } = Route.useParams();
   const navigate = useNavigate();
-  const { data } = useSuspenseQuery(featuresQueryOptions(environmentId));
+  const { data } = useSuspenseQuery(
+    featuresQueryOptions(projectId, environmentId)
+  );
 
   const handleFeatureNavigate = (featureId: string) => {
     navigate({

@@ -10,6 +10,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { projectCreateMutation } from "@/services/projects";
+import { useState } from "react";
 
 type NewProjectProps = {
   open: boolean;
@@ -17,14 +19,28 @@ type NewProjectProps = {
 };
 
 export function NewProject({ open, onOpenChange }: NewProjectProps) {
+  const { mutate: createProject } = projectCreateMutation();
+  const [name, setName] = useState("");
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const handleCreateProject = () => {
+    if (name) {
+      createProject({
+        name: name,
+      });
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Add project</SheetTitle>
           <SheetDescription>
-            Creating a new project also adds an environment named "Default" to
-            which all features are attached to
+            Creating a new project also adds an environment named "Default"
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-0 px-4">
@@ -32,12 +48,18 @@ export function NewProject({ open, onOpenChange }: NewProjectProps) {
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
-            <Input id="name" required className="col-span-3" />
+            <Input
+              id="name"
+              required
+              value={name}
+              onChange={handleNameChange}
+              className="col-span-3"
+            />
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Create</Button>
+            <Button onClick={handleCreateProject}>Create</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

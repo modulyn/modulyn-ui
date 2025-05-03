@@ -44,12 +44,13 @@ function FeaturePendingComponent() {
 }
 
 function FeatureComponent() {
-  const { environmentId, featureId } = Route.useParams();
+  const { projectId, environmentId, featureId } = Route.useParams();
   const { data } = useSuspenseQuery(
-    featureQueryOptions(environmentId, featureId)
+    featureQueryOptions(projectId, environmentId, featureId)
   );
   const [featureState, setFeatureState] = useState(data.enabled);
   const { mutate: updateFeature } = featureUpdateMutation(
+    projectId,
     environmentId,
     featureId
   );
@@ -60,8 +61,6 @@ function FeatureComponent() {
 
   const handleFeatureSave = () => {
     updateFeature({
-      id: featureId,
-      environmentId: environmentId,
       value: featureState,
     });
   };

@@ -10,6 +10,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useParams } from "@tanstack/react-router";
+import { environmentCreateMutation } from "@/services/environments";
+import { useState } from "react";
 
 type NewEnvironmentProps = {
   open: boolean;
@@ -17,14 +20,32 @@ type NewEnvironmentProps = {
 };
 
 export function NewEnvironment({ open, onOpenChange }: NewEnvironmentProps) {
+  const { projectId } = useParams({
+    from: "/projects/$projectId/environments/$environmentId/features/",
+  });
+  const { mutate: createEnvironment } = environmentCreateMutation(projectId);
+  const [name, setName] = useState("");
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const handleCreateEnvironment = () => {
+    if (name) {
+      createEnvironment({
+        name: name,
+      });
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Add environment</SheetTitle>
           <SheetDescription>
-            Creating a new environment adds all the existing features in the
-            project to this environment
+            Creating a new environment will generate a SDK Key for this
+            environment
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-0 px-4">
@@ -32,12 +53,18 @@ export function NewEnvironment({ open, onOpenChange }: NewEnvironmentProps) {
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
-            <Input id="name" required className="col-span-3" />
+            <Input
+              id="name"
+              required
+              value={name}
+              onChange={handleNameChange}
+              className="col-span-3"
+            />
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Create</Button>
+            <Button onClick={handleCreateEnvironment}>Create</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

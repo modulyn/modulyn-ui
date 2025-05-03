@@ -12,81 +12,112 @@ type FeatureType = {
 };
 
 type UpdateFeatureType = {
-  id: string;
-  environmentId: string;
   value: boolean;
 };
 
 type CreateFeatureType = {
   name: string;
-  projectId: string;
 };
 
 // get features
-const fetchFeatures = async (environmentId: string) => {
+const fetchFeatures = async (projectId: string, environmentId: string) => {
   return axios
     .get<
       ResponseArray<FeatureType>
-    >(`http://localhost:8080/api/v1/features?sdk_key=${environmentId}`)
+    >(`http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}/features`)
     .then((r) => r.data.data);
 };
 
-export const featuresQueryOptions = (environmentId: string) =>
+export const featuresQueryOptions = (
+  projectId: string,
+  environmentId: string
+) =>
   queryOptions({
-    queryKey: ["features", environmentId],
-    queryFn: () => fetchFeatures(environmentId),
+    queryKey: ["features", projectId, environmentId],
+    queryFn: () => fetchFeatures(projectId, environmentId),
   });
 
 // update feature
-const updateFeature = async (input: UpdateFeatureType) => {
-  return axios.put(`http://localhost:8080/api/v1/features`, input, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+const updateFeature = async (
+  projectId: string,
+  environmentId: string,
+  featureId: string,
+  input: UpdateFeatureType
+) => {
+  return axios.put(
+    `http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}/features/${featureId}`,
+    input,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 };
 
 export const featureUpdateMutation = (
+  projectId: string,
   environmentId: string,
   featureId: string
 ) =>
   useMutation({
-    mutationFn: (input: UpdateFeatureType) => updateFeature(input),
+    mutationFn: (input: UpdateFeatureType) =>
+      updateFeature(projectId, environmentId, featureId, input),
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: ["environment", environmentId, "feature", featureId],
+        queryKey: ["features", projectId, environmentId, featureId],
       }),
   });
 
 // get feature
-const fetchFeature = async (environmentId: string, featureId: string) => {
+const fetchFeature = async (
+  projectId: string,
+  environmentId: string,
+  featureId: string
+) => {
   return axios
     .get<
       Response<FeatureType>
-    >(`http://localhost:8080/api/v1/environments/${environmentId}/features/${featureId}`)
+    >(`http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}/features/${featureId}`)
     .then((r) => r.data.data);
 };
 
-export const featureQueryOptions = (environmentId: string, featureId: string) =>
+export const featureQueryOptions = (
+  projectId: string,
+  environmentId: string,
+  featureId: string
+) =>
   queryOptions({
-    queryKey: ["environment", environmentId, "feature", featureId],
-    queryFn: () => fetchFeature(environmentId, featureId),
+    queryKey: ["features", projectId, environmentId, featureId],
+    queryFn: () => fetchFeature(projectId, environmentId, featureId),
   });
 
 // create feature
-const createFeature = async (input: CreateFeatureType) => {
-  return axios.post(`http://localhost:8080/api/v1/environment`, input, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+const createFeature = async (
+  projectId: string,
+  environmentId: string,
+  input: CreateFeatureType
+) => {
+  return axios.post(
+    `http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}/features`,
+    input,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 };
 
-export const featureCreateMutation = (environmentId: string) =>
+export const featureCreateMutation = (
+  projectId: string,
+  environmentId: string
+) =>
   useMutation({
-    mutationFn: (input: CreateFeatureType) => createFeature(input),
+    mutationFn: (input: CreateFeatureType) =>
+      createFeature(projectId, environmentId, input),
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: ["features", environmentId],
+        queryKey: ["features", projectId, environmentId],
       }),
   });

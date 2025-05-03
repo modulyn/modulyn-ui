@@ -11,7 +11,6 @@ type EnvironmentType = {
 
 type CreateEnvironmentType = {
   name: string;
-  projectId: string;
 };
 
 // get environments
@@ -19,7 +18,7 @@ const fetchEnvironments = async (projectId: string) => {
   return axios
     .get<
       ResponseArray<EnvironmentType>
-    >(`http://localhost:8080/api/v1/environments?project_id=${projectId}`)
+    >(`http://localhost:8080/api/v1/projects/${projectId}/environments`)
     .then((r) =>
       r.data.data.map((d) => {
         return {
@@ -34,21 +33,29 @@ export const environmentsQueryOptions = (projectId: string) =>
   queryOptions({
     queryKey: ["environments", projectId],
     queryFn: () => fetchEnvironments(projectId),
-    enabled: false,
+    enabled: projectId !== "",
   });
 
 // create environment
-const createEnvironment = async (input: CreateEnvironmentType) => {
-  return axios.post(`http://localhost:8080/api/v1/environment`, input, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+const createEnvironment = async (
+  projectId: string,
+  input: CreateEnvironmentType
+) => {
+  return axios.post(
+    `http://localhost:8080/api/v1/projects/${projectId}/environments`,
+    input,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 };
 
 export const environmentCreateMutation = (projectId: string) =>
   useMutation({
-    mutationFn: (input: CreateEnvironmentType) => createEnvironment(input),
+    mutationFn: (input: CreateEnvironmentType) =>
+      createEnvironment(projectId, input),
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: ["environments", projectId],

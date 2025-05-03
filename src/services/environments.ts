@@ -1,5 +1,5 @@
 import axios from "redaxios";
-import { ResponseArray } from "./response-type";
+import { ResponseArray, Response } from "./response-type";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/main";
 
@@ -19,14 +19,7 @@ const fetchEnvironments = async (projectId: string) => {
     .get<
       ResponseArray<EnvironmentType>
     >(`http://localhost:8080/api/v1/projects/${projectId}/environments`)
-    .then((r) =>
-      r.data.data.map((d) => {
-        return {
-          ...d,
-          projectId: projectId,
-        };
-      })
-    );
+    .then((r) => r.data.data);
 };
 
 export const environmentsQueryOptions = (projectId: string) =>
@@ -60,4 +53,22 @@ export const environmentCreateMutation = (projectId: string) =>
       queryClient.invalidateQueries({
         queryKey: ["environments", projectId],
       }),
+  });
+
+// get environment
+const fetchEnvironment = async (projectId: string, environmentId: string) => {
+  return axios
+    .get<
+      Response<EnvironmentType>
+    >(`http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}`)
+    .then((r) => r.data.data);
+};
+
+export const environmentQueryOptions = (
+  projectId: string,
+  environmentId: string
+) =>
+  queryOptions({
+    queryKey: ["environments", projectId, environmentId],
+    queryFn: () => fetchEnvironment(projectId, environmentId),
   });

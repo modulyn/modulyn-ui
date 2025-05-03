@@ -27,7 +27,7 @@ function FeatureErrorComponent() {
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Error</AlertTitle>
       <AlertDescription>
-        Failed to fetch feature. Try again later!
+        Failed to fetch details. Try again later!
       </AlertDescription>
     </Alert>
   );

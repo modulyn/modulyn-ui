@@ -68,7 +68,13 @@ export function AppSidebar() {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (selectedProject && selectedEnvironment && !featureId) {
+    if (
+      selectedProject &&
+      selectedEnvironment &&
+      !isProjectsPending &&
+      !isEnvironmentsPending &&
+      !featureId
+    ) {
       navigate({
         to: "/projects/$projectId/environments/$environmentId/features",
         params: {
@@ -77,7 +83,13 @@ export function AppSidebar() {
         },
       });
     }
-  }, [selectedProject, selectedEnvironment]);
+  }, [
+    selectedProject,
+    selectedEnvironment,
+    isProjectsPending,
+    isEnvironmentsPending,
+    featureId,
+  ]);
 
   useEffect(() => {
     if (environmentId) {

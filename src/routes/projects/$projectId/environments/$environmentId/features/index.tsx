@@ -3,7 +3,9 @@ import { NewEnvironment } from "@/components/new-environment";
 import { NewFeature } from "@/components/new-feature";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { environmentQueryOptions } from "@/services/environments";
 import { featuresQueryOptions } from "@/services/features";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -70,8 +72,11 @@ function FeaturesComponent() {
   const [openNewFeature, setOpenNewFeature] = useState(false);
   const { projectId, environmentId } = Route.useParams();
   const navigate = useNavigate();
-  const { data } = useSuspenseQuery(
+  const { data: features } = useSuspenseQuery(
     featuresQueryOptions(projectId, environmentId)
+  );
+  const { data: environment } = useSuspenseQuery(
+    environmentQueryOptions(projectId, environmentId)
   );
 
   const handleFeatureNavigate = (featureId: string) => {
@@ -88,7 +93,10 @@ function FeaturesComponent() {
   return (
     <>
       <div className="flex flex-row justify-between gap-2 my-2">
-        <div className="text-2xl">Features</div>
+        <div className="flex flex-row items-center gap-2">
+          <div className="text-2xl">{environment.name}</div>
+          <div className="text-muted-foreground">(Environment)</div>
+        </div>
         <div className="flex flex-row gap-2">
           <Button onClick={() => setOpenNewEnvironment(true)}>
             <PlusIcon /> Add Environment
@@ -99,8 +107,16 @@ function FeaturesComponent() {
         </div>
       </div>
 
+      <div className="grid grid-cols-4">
+        <div>SDK Key:</div>
+        <div className="col-span-3">{environment.id}</div>
+      </div>
+
+      <Separator />
+
+      <div className="text-2xl">Features</div>
       <div className="grid grid-cols-3 gap-2">
-        {data.map((feature) => (
+        {features.map((feature) => (
           <FeatureCard
             key={feature.id}
             id={feature.id}

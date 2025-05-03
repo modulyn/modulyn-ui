@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { featuresQueryOptions } from "@/services/features";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, PlusIcon } from "lucide-react";
 
 export const Route = createFileRoute(
-  "/projects/$projectId/environments/$environmentId/features"
+  "/projects/$projectId/environments/$environmentId/features/"
 )({
   component: FeaturesComponent,
   errorComponent: FeaturesErrorComponent,
@@ -17,22 +17,20 @@ export const Route = createFileRoute(
 
 function FeaturesErrorComponent() {
   return (
-    <div className="flex flex-col pb-2 pl-2 pr-4">
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to fetch features. Try again later!
-        </AlertDescription>
-      </Alert>
-    </div>
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Error</AlertTitle>
+      <AlertDescription>
+        Failed to fetch features. Try again later!
+      </AlertDescription>
+    </Alert>
   );
 }
 
 function FeaturesPendingComponent() {
   return (
-    <div className="flex flex-col pb-2 px-2">
-      <div className="flex flex-row justify-between gap-2 my-2">
+    <>
+      <div className="flex flex-row my-2 justify-between">
         <div className="text-2xl">Features</div>
         <div className="flex flex-row gap-2">
           <Button disabled>
@@ -43,8 +41,7 @@ function FeaturesPendingComponent() {
           </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-3 gap-2 mt-2 pl-2 pr-4">
+      <div className="grid grid-cols-3 gap-2 mt-2">
         <Skeleton className="h-22"></Skeleton>
         <Skeleton className="h-22"></Skeleton>
         <Skeleton className="h-22"></Skeleton>
@@ -52,15 +49,28 @@ function FeaturesPendingComponent() {
         <Skeleton className="h-22"></Skeleton>
         <Skeleton className="h-22"></Skeleton>
       </div>
-    </div>
+    </>
   );
 }
 
 function FeaturesComponent() {
-  const { environmentId } = Route.useParams();
+  const { environmentId, projectId } = Route.useParams();
+  const navigate = useNavigate();
   const { data } = useSuspenseQuery(featuresQueryOptions(environmentId));
+
+  const handleFeatureNavigate = (featureId: string) => {
+    navigate({
+      to: "/projects/$projectId/environments/$environmentId/features/$featureId",
+      params: {
+        environmentId: environmentId,
+        projectId: projectId,
+        featureId: featureId,
+      },
+    });
+  };
+
   return (
-    <div className="flex flex-col pb-2 px-2">
+    <>
       <div className="flex flex-row justify-between gap-2 my-2">
         <div className="text-2xl">Features</div>
         <div className="flex flex-row gap-2">
@@ -73,7 +83,7 @@ function FeaturesComponent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-2">
+      <div className="grid grid-cols-3 gap-2">
         {data.map((feature) => (
           <FeatureCard
             key={feature.id}
@@ -81,9 +91,10 @@ function FeaturesComponent() {
             name={feature.name}
             enabled={feature.enabled}
             updatedAt={feature.updatedAt}
+            onFeatureClick={handleFeatureNavigate}
           />
         ))}
       </div>
-    </div>
+    </>
   );
 }

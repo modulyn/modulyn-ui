@@ -1,5 +1,5 @@
 import axios from "redaxios";
-import { Response } from "./response-type";
+import { ResponseArray } from "./response-type";
 import { queryOptions } from "@tanstack/react-query";
 
 type ProjectType = {
@@ -9,7 +9,7 @@ type ProjectType = {
 
 const fetchProjects = async () => {
   return axios
-    .get<Response<ProjectType>>("http://localhost:8080/api/v1/projects")
+    .get<ResponseArray<ProjectType>>("http://localhost:8080/api/v1/projects")
     .then((r) => r.data.data);
 };
 

@@ -1,5 +1,5 @@
 import axios from "redaxios";
-import { Response } from "./response-type";
+import { ResponseArray } from "./response-type";
 import { queryOptions } from "@tanstack/react-query";
 
 type EnvironmentType = {
@@ -11,7 +11,7 @@ type EnvironmentType = {
 const fetchEnvironments = async (projectId: string) => {
   return axios
     .get<
-      Response<EnvironmentType>
+      ResponseArray<EnvironmentType>
     >(`http://localhost:8080/api/v1/environments?project_id=${projectId}`)
     .then((r) =>
       r.data.data.map((d) => {

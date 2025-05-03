@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <SidebarTrigger />
           <ModeToggle />
         </div>
-        {children}
+        <div className="flex flex-col pb-2 pl-2 pr-4 gap-2">{children}</div>
       </main>
     </SidebarProvider>
   );

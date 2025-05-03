@@ -12,7 +12,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useRouterState,
+} from "@tanstack/react-router";
 import { Command, PlusIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -23,9 +28,10 @@ import { environmentsQueryOptions } from "@/services/environments";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { projectId, environmentId } = useParams({
+  const { projectId, environmentId, featureId } = useParams({
     strict: false,
   });
+  const router = useRouterState();
   const [isProjectChanged, setIsProjectChanged] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
@@ -46,7 +52,7 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (environments && environments.length > 0) {
-      if (isProjectChanged) {
+      if (isProjectChanged || router.location.pathname === "/") {
         setSelectedEnvironment(environments[0].id);
         setIsProjectChanged(false);
       }
@@ -60,7 +66,7 @@ export function AppSidebar() {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (selectedProject && selectedEnvironment) {
+    if (selectedProject && selectedEnvironment && !featureId) {
       navigate({
         to: "/projects/$projectId/environments/$environmentId/features",
         params: {

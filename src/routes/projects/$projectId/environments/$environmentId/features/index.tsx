@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/copy-button";
 import { FeatureCard } from "@/components/feature-card";
 import { NewEnvironment } from "@/components/new-environment";
 import { NewFeature } from "@/components/new-feature";
@@ -109,7 +110,9 @@ function FeaturesComponent() {
 
       <div className="grid grid-cols-4">
         <div>SDK Key:</div>
-        <div className="col-span-3">{environment.id}</div>
+        <div className="col-span-3">
+          {environment.id} <CopyButton text={environment.id} />
+        </div>
       </div>
 
       <Separator />

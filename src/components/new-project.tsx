@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { projectCreateMutation } from "@/services/projects";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 type NewProjectProps = {
   open: boolean;
@@ -19,7 +20,8 @@ type NewProjectProps = {
 };
 
 export function NewProject({ open, onOpenChange }: NewProjectProps) {
-  const { mutate: createProject } = projectCreateMutation();
+  const navigate = useNavigate();
+  const { mutate: createProject } = projectCreateMutation(navigate);
   const [name, setName] = useState("");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

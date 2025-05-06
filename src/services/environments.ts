@@ -2,6 +2,8 @@ import axios from "redaxios";
 import { ResponseArray, Response } from "./response-type";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/main";
+import { toast } from "sonner";
+import { UseNavigateResult } from "@tanstack/react-router";
 
 type EnvironmentType = {
   id: string;
@@ -14,7 +16,7 @@ type CreateEnvironmentType = {
 };
 
 // get environments
-const fetchEnvironments = async (projectId: string) => {
+const fetchEnvironments = async (projectId: string | undefined) => {
   return axios
     .get<
       ResponseArray<EnvironmentType>
@@ -22,11 +24,11 @@ const fetchEnvironments = async (projectId: string) => {
     .then((r) => r.data.data);
 };
 
-export const environmentsQueryOptions = (projectId: string) =>
+export const environmentsQueryOptions = (projectId: string | undefined) =>
   queryOptions({
     queryKey: ["environments", projectId],
     queryFn: () => fetchEnvironments(projectId),
-    enabled: projectId !== "",
+    enabled: !!projectId,
   });
 
 // create environment
@@ -45,14 +47,29 @@ const createEnvironment = async (
   );
 };
 
-export const environmentCreateMutation = (projectId: string) =>
+export const environmentCreateMutation = (
+  projectId: string,
+  navigate: UseNavigateResult<string>
+) =>
   useMutation({
     mutationFn: (input: CreateEnvironmentType) =>
       createEnvironment(projectId, input),
-    onSuccess: () =>
+    onSuccess: (data, variables) => {
+      const envId = data.data.data.toString();
       queryClient.invalidateQueries({
         queryKey: ["environments", projectId],
-      }),
+      });
+      toast.success("Success", {
+        description: `Environment ${variables.name} created successfully`,
+      });
+      navigate({
+        to: "/projects/$projectId/environments/$environmentId/features",
+        params: {
+          projectId: projectId,
+          environmentId: envId,
+        },
+      });
+    },
   });
 
 // get environment

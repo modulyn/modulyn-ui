@@ -30,11 +30,10 @@ import { NewProject } from "./new-project";
 export function AppSidebar() {
   const [openNewProject, setOpenNewProject] = useState(false);
   const navigate = useNavigate();
-  const { projectId, environmentId, featureId } = useParams({
+  const { projectId, environmentId } = useParams({
     strict: false,
   });
   const router = useRouterState();
-  const [isProjectChanged, setIsProjectChanged] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
   const { data: projects, isPending: isProjectsPending } = useSuspenseQuery(
@@ -42,24 +41,15 @@ export function AppSidebar() {
   );
   const {
     data: environments,
-    refetch: fetchEnvironments,
     isPending: isEnvironmentsPending,
+    refetch: fetchEnvironments,
   } = useQuery(environmentsQueryOptions(selectedProject));
 
   useEffect(() => {
-    if (projects && projects.length > 0) {
+    if (router.location.pathname === "/") {
       setSelectedProject(projects[0].id);
     }
-  }, [projects]);
-
-  useEffect(() => {
-    if (environments && environments.length > 0) {
-      if (isProjectChanged || router.location.pathname === "/") {
-        setSelectedEnvironment(environments[0].id);
-        setIsProjectChanged(false);
-      }
-    }
-  }, [environments]);
+  }, [router.location.pathname]);
 
   useEffect(() => {
     if (selectedProject) {
@@ -69,27 +59,24 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (
-      selectedProject &&
-      selectedEnvironment &&
-      !isProjectsPending &&
-      !isEnvironmentsPending &&
-      !featureId
+      !projectId &&
+      !environmentId &&
+      projects &&
+      projects.length > 0 &&
+      environments &&
+      environments.length > 0
     ) {
+      setSelectedProject(projects[0].id);
+      setSelectedEnvironment(environments[0].id);
       navigate({
         to: "/projects/$projectId/environments/$environmentId/features",
         params: {
-          projectId: selectedProject,
-          environmentId: selectedEnvironment,
+          projectId: projects[0].id,
+          environmentId: environments[0].id,
         },
       });
     }
-  }, [
-    selectedProject,
-    selectedEnvironment,
-    isProjectsPending,
-    isEnvironmentsPending,
-    featureId,
-  ]);
+  }, [projectId, environmentId, projects, environments]);
 
   useEffect(() => {
     if (environmentId) {
@@ -103,9 +90,23 @@ export function AppSidebar() {
     }
   }, [projectId]);
 
-  const handleSelectProject = (projectId: string) => {
-    setSelectedProject(projectId);
-    setIsProjectChanged(true);
+  const handleSelectSidebarItem = (
+    newProjectId: string,
+    newEnvironmentId?: string
+  ) => {
+    let envToRedirectTo = "";
+    if (!newEnvironmentId) {
+      envToRedirectTo = `sdk-${newProjectId}`;
+    }
+    setSelectedProject(newProjectId);
+    setSelectedEnvironment(envToRedirectTo);
+    navigate({
+      to: "/projects/$projectId/environments/$environmentId/features",
+      params: {
+        projectId: newProjectId,
+        environmentId: envToRedirectTo,
+      },
+    });
   };
 
   return (
@@ -147,18 +148,18 @@ export function AppSidebar() {
             )}
             {projects &&
               projects.length > 0 &&
-              projects.map((project: any) => (
+              projects.map((project) => (
                 <Collapsible
                   key={project.id}
                   className="group/collapsible"
                   open={selectedProject === project.id}
-                  onOpenChange={() => handleSelectProject(project.id)}
+                  // onOpenChange={() => setSelectedProject(project.id)}
                 >
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
                       isActive={project.id === selectedProject}
-                      onClick={() => handleSelectProject(project.id)}
+                      onClick={() => handleSelectSidebarItem(project.id)}
                     >
                       <span>{project.name}</span>
                     </SidebarMenuButton>
@@ -177,7 +178,7 @@ export function AppSidebar() {
                           )}
                           {environments &&
                             environments.length > 0 &&
-                            environments.map((environment: any) => (
+                            environments.map((environment) => (
                               <SidebarMenuSubItem key={environment.id}>
                                 <SidebarMenuSubButton
                                   asChild
@@ -185,7 +186,10 @@ export function AppSidebar() {
                                     environment.id === selectedEnvironment
                                   }
                                   onClick={() =>
-                                    setSelectedEnvironment(environment.id)
+                                    handleSelectSidebarItem(
+                                      project.id,
+                                      environment.id
+                                    )
                                   }
                                 >
                                   <Link

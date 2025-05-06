@@ -10,7 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { environmentCreateMutation } from "@/services/environments";
 import { useState } from "react";
 
@@ -20,10 +20,14 @@ type NewEnvironmentProps = {
 };
 
 export function NewEnvironment({ open, onOpenChange }: NewEnvironmentProps) {
+  const navigate = useNavigate();
   const { projectId } = useParams({
     from: "/projects/$projectId/environments/$environmentId/features/",
   });
-  const { mutate: createEnvironment } = environmentCreateMutation(projectId);
+  const { mutate: createEnvironment } = environmentCreateMutation(
+    projectId,
+    navigate
+  );
   const [name, setName] = useState("");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -108,7 +108,7 @@ function FeaturesComponent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-4 items-center">
         <div>SDK Key:</div>
         <div className="col-span-3">
           {environment.id} <CopyButton text={environment.id} />
@@ -119,6 +119,10 @@ function FeaturesComponent() {
 
       <div className="text-2xl">Features</div>
       <div className="grid grid-cols-3 gap-2">
+        {features.length === 0 && (
+          <div className="text-muted-foreground">No features found</div>
+        )}
+
         {features.map((feature) => (
           <FeatureCard
             key={feature.id}

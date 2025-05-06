@@ -2,6 +2,7 @@ import { queryOptions, useMutation } from "@tanstack/react-query";
 import axios from "redaxios";
 import { ResponseArray, Response } from "./response-type";
 import { queryClient } from "@/main";
+import { toast } from "sonner";
 
 type FeatureType = {
   id: string;
@@ -63,10 +64,14 @@ export const featureUpdateMutation = (
   useMutation({
     mutationFn: (input: UpdateFeatureType) =>
       updateFeature(projectId, environmentId, featureId, input),
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["features", projectId, environmentId, featureId],
-      }),
+      });
+      toast.success("Success", {
+        description: "Feature updated successfully",
+      });
+    },
   });
 
 // get feature
@@ -116,8 +121,12 @@ export const featureCreateMutation = (
   useMutation({
     mutationFn: (input: CreateFeatureType) =>
       createFeature(projectId, environmentId, input),
-    onSuccess: () =>
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["features", projectId, environmentId],
-      }),
+      });
+      toast.success("Success", {
+        description: `Feature ${variables.name} created successfully`,
+      });
+    },
   });

@@ -2,6 +2,8 @@ import axios from "redaxios";
 import { ResponseArray } from "./response-type";
 import { queryOptions, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/main";
+import { toast } from "sonner";
+import { UseNavigateResult } from "@tanstack/react-router";
 
 type ProjectType = {
   id: string;
@@ -34,11 +36,24 @@ const createProject = async (input: CreateProjectType) => {
   });
 };
 
-export const projectCreateMutation = () =>
+export const projectCreateMutation = (navigate: UseNavigateResult<string>) =>
   useMutation({
     mutationFn: (input: CreateProjectType) => createProject(input),
-    onSuccess: () =>
+    onSuccess: (data, variables) => {
+      const projectId = data.data.data;
+      const environmentId = `sdk-${projectId}`;
       queryClient.invalidateQueries({
         queryKey: ["projects"],
-      }),
+      });
+      toast.success("Success", {
+        description: `Project ${variables.name} created successfully`,
+      });
+      navigate({
+        to: "/projects/$projectId/environments/$environmentId/features",
+        params: {
+          projectId: projectId,
+          environmentId: environmentId,
+        },
+      });
+    },
   });

@@ -97,6 +97,8 @@ export function AppSidebar() {
     let envToRedirectTo = "";
     if (!newEnvironmentId) {
       envToRedirectTo = `sdk-${newProjectId}`;
+    } else {
+      envToRedirectTo = newEnvironmentId;
     }
     setSelectedProject(newProjectId);
     setSelectedEnvironment(envToRedirectTo);
@@ -153,7 +155,6 @@ export function AppSidebar() {
                   key={project.id}
                   className="group/collapsible"
                   open={selectedProject === project.id}
-                  // onOpenChange={() => setSelectedProject(project.id)}
                 >
                   <SidebarMenuItem>
                     <SidebarMenuButton

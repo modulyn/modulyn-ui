@@ -13,7 +13,7 @@ type FeatureType = {
 };
 
 type UpdateFeatureType = {
-  value: boolean;
+  enabled: boolean;
 };
 
 type CreateFeatureType = {

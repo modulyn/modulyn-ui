@@ -55,13 +55,13 @@ function FeatureComponent() {
     featureId
   );
 
-  const handleFeatureStatusChange = (value: boolean) => {
-    setFeatureState(value);
+  const handleFeatureStatusChange = (enabled: boolean) => {
+    setFeatureState(enabled);
   };
 
   const handleFeatureSave = () => {
     updateFeature({
-      value: featureState,
+      enabled: featureState,
     });
   };
 

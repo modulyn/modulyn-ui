@@ -1,8 +1,12 @@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tag, TagsInput } from "@/components/ui/tags-input";
 import { getUITime } from "@/lib/utils";
 import {
   featureQueryOptions,
@@ -48,22 +52,46 @@ function FeatureComponent() {
   const { data } = useSuspenseQuery(
     featureQueryOptions(projectId, environmentId, featureId)
   );
-  const [featureState, setFeatureState] = useState(data.enabled);
+  const [defaultFeatureValue, setDefaultFeatureValue] = useState(data.enabled);
+  const [jsonValueEnabled, setJsonValueEnabled] = useState(
+    data.jsonValue.enabled
+  );
   const { mutate: updateFeature } = featureUpdateMutation(
     projectId,
     environmentId,
     featureId
   );
-
-  const handleFeatureStatusChange = (enabled: boolean) => {
-    setFeatureState(enabled);
-  };
+  const [key, setKey] = useState(data.jsonValue.key);
+  const [tags, setTags] = useState<Tag[]>(
+    data.jsonValue.values?.map((v) => {
+      return {
+        id: v,
+        name: v,
+      };
+    }) ?? []
+  );
 
   const handleFeatureSave = () => {
     updateFeature({
-      enabled: featureState,
+      enabled: defaultFeatureValue,
+      jsonValue: {
+        key: key,
+        values: tags.map((t) => t.name),
+        enabled: jsonValueEnabled,
+      },
     });
   };
+
+  function arrayEquals(arr1: string[], arr2: string[]) {
+    if (arr1 == null && arr2 != null) {
+      return false;
+    }
+
+    if (arr1?.length !== arr2?.length) {
+      return false;
+    }
+    return arr1?.every((element, index) => element === arr2?.[index]);
+  }
 
   return (
     <>
@@ -72,7 +100,15 @@ function FeatureComponent() {
         <div className="flex flex-row gap-2">
           <Button
             onClick={handleFeatureSave}
-            disabled={data.enabled === featureState}
+            disabled={
+              data.enabled === defaultFeatureValue &&
+              data.jsonValue.enabled === jsonValueEnabled &&
+              data.jsonValue.key === key &&
+              arrayEquals(
+                data.jsonValue.values ?? [],
+                tags.map((t) => t.name)
+              )
+            }
           >
             <SaveIcon /> Save
           </Button>
@@ -84,36 +120,84 @@ function FeatureComponent() {
           <TabsTrigger value="configuration">Configuration</TabsTrigger>
         </TabsList>
         <TabsContent value="status">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-2 mt-2">
-              <Switch
-                id="enabled"
-                checked={featureState}
-                onCheckedChange={handleFeatureStatusChange}
-              />
-              <div className="text-muted-foreground text-sm">
-                Will return{" "}
-                <span className="italic">
-                  {featureState ? "true" : "false"}
-                </span>
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="grid grid-cols-12 items-start">
+              <Label htmlFor="values" className="col-span-2">
+                Default value
+              </Label>
+              <div className="grid grid-rows-2 col-span-10">
+                <Switch
+                  id="enabled"
+                  checked={defaultFeatureValue}
+                  className="col-span-10"
+                  onCheckedChange={(checked) => setDefaultFeatureValue(checked)}
+                />
+                <div className="text-muted-foreground text-sm">
+                  Will return{" "}
+                  <span className="italic">
+                    {defaultFeatureValue ? "true" : "false"}
+                  </span>
+                </div>
               </div>
             </div>
-            <table className="table-auto sm:w-full md:w-96">
-              <tbody>
-                <tr>
-                  <td>Created on:</td>
-                  <td>{getUITime(data.createdAt)}</td>
-                </tr>
-                <tr>
-                  <td>Last modified on:</td>
-                  <td>{getUITime(data.updatedAt)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="grid grid-cols-12">
+              <Label className="col-span-2">Created on</Label>
+              <Label className="col-span-10">{getUITime(data.createdAt)}</Label>
+            </div>
+            <div className="grid grid-cols-12">
+              <Label className="col-span-2">Last modified on</Label>
+              <Label className="col-span-10">{getUITime(data.updatedAt)}</Label>
+            </div>
+            <Separator />
+            <Label>
+              You can define key, values below to allow for some key based flags
+            </Label>
+            <div className="grid grid-cols-12">
+              <Label htmlFor="key" className="col-span-2">
+                Key
+              </Label>
+              <Input
+                id="key"
+                placeholder="Enter a key"
+                className="col-span-10"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-12">
+              <Label htmlFor="values" className="col-span-2">
+                Values
+              </Label>
+              <TagsInput
+                id="values"
+                className="col-span-10 bg-transparent"
+                value={tags}
+                onChange={(tags) => setTags(tags)}
+              />
+            </div>
+            <div className="grid grid-cols-12 items-start">
+              <Label htmlFor="values" className="col-span-2">
+                Status
+              </Label>
+              <div className="grid grid-rows-2 col-span-10">
+                <Switch
+                  id="enabled"
+                  checked={jsonValueEnabled}
+                  className="col-span-10"
+                  onCheckedChange={(checked) => setJsonValueEnabled(checked)}
+                />
+                <div className="text-muted-foreground text-sm">
+                  Will return{" "}
+                  <span className="italic">
+                    {jsonValueEnabled ? "true" : "false"}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="configuration">
-          <div className="flex flex-col gap-2">Configuration details</div>
+          <div className="flex flex-col gap-2"></div>
         </TabsContent>
       </Tabs>
     </>

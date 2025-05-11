@@ -8,16 +8,24 @@ type FeatureType = {
   id: string;
   name: string;
   enabled: boolean;
+  jsonValue: JsonValueType;
   createdAt: string;
   updatedAt: string;
 };
 
 type UpdateFeatureType = {
   enabled: boolean;
+  jsonValue: JsonValueType;
 };
 
 type CreateFeatureType = {
   name: string;
+};
+
+export type JsonValueType = {
+  key: string;
+  values: string[];
+  enabled: boolean;
 };
 
 // get features

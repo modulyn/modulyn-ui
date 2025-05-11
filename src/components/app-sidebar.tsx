@@ -47,7 +47,7 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (router.location.pathname === "/") {
-      setSelectedProject(projects[0].id);
+      setSelectedProject(projects[0]?.id);
     }
   }, [router.location.pathname]);
 

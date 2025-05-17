@@ -198,12 +198,14 @@ function FeatureComponent() {
                       id={field.name}
                       name={field.name}
                       className="col-span-10 bg-transparent"
-                      value={field.state.value.map((v) => {
-                        return {
-                          id: v,
-                          name: v,
-                        };
-                      })}
+                      value={
+                        field.state.value?.map((v) => {
+                          return {
+                            id: v,
+                            name: v,
+                          };
+                        }) ?? []
+                      }
                       onChange={(tags) =>
                         field.handleChange(tags.map((tag) => tag.name))
                       }

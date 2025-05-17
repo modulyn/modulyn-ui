@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tag, TagsInput } from "@/components/ui/tags-input";
+import { TagsInput } from "@/components/ui/tags-input";
 import { getUITime } from "@/lib/utils";
 import {
   featureQueryOptions,
@@ -15,7 +15,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, SaveIcon } from "lucide-react";
-import { useState } from "react";
+import { AnyFieldApi, useForm } from "@tanstack/react-form";
 
 export const Route = createFileRoute(
   "/projects/$projectId/environments/$environmentId/features/$featureId"
@@ -52,66 +52,58 @@ function FeatureComponent() {
   const { data } = useSuspenseQuery(
     featureQueryOptions(projectId, environmentId, featureId)
   );
-  const [defaultFeatureValue, setDefaultFeatureValue] = useState(data.enabled);
-  const [jsonValueEnabled, setJsonValueEnabled] = useState(
-    data.jsonValue.enabled
-  );
-  const { mutate: updateFeature } = featureUpdateMutation(
+  const updateFeatureMutation = featureUpdateMutation(
     projectId,
     environmentId,
     featureId
   );
-  const [key, setKey] = useState(data.jsonValue.key);
-  const [tags, setTags] = useState<Tag[]>(
-    data.jsonValue.values?.map((v) => {
-      return {
-        id: v,
-        name: v,
-      };
-    }) ?? []
-  );
 
-  const handleFeatureSave = () => {
-    updateFeature({
-      enabled: defaultFeatureValue,
-      jsonValue: {
-        key: key,
-        values: tags.map((t) => t.name),
-        enabled: jsonValueEnabled,
+  const { handleSubmit, Field, Subscribe } = useForm({
+    defaultValues: {
+      enabled: data?.enabled ?? false,
+      jsonValue: data?.jsonValue ?? {
+        key: "",
+        values: [],
+        enabled: false,
       },
-    });
-  };
+    },
+    onSubmit: async ({ value }) => {
+      await updateFeatureMutation.mutateAsync(value);
+    },
+  });
 
-  function arrayEquals(arr1: string[], arr2: string[]) {
-    if (arr1 == null && arr2 != null) {
-      return false;
-    }
-
-    if (arr1?.length !== arr2?.length) {
-      return false;
-    }
-    return arr1?.every((element, index) => element === arr2?.[index]);
+  function FieldInfo({ field }: { field: AnyFieldApi }) {
+    return (
+      <>
+        {field.state.meta.isTouched && !field.state.meta.isValid ? (
+          <em className="text-xs text-red-500">
+            {field.state.meta.errors.join(",")}
+          </em>
+        ) : null}
+        {field.state.meta.isValidating ? "Validating..." : null}
+      </>
+    );
   }
 
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSubmit();
+      }}
+    >
       <div className="flex flex-row justify-between gap-2 my-2">
         <div className="text-2xl">{data.name}</div>
         <div className="flex flex-row gap-2">
-          <Button
-            onClick={handleFeatureSave}
-            disabled={
-              data.enabled === defaultFeatureValue &&
-              data.jsonValue.enabled === jsonValueEnabled &&
-              data.jsonValue.key === key &&
-              arrayEquals(
-                data.jsonValue.values ?? [],
-                tags.map((t) => t.name)
-              )
-            }
-          >
-            <SaveIcon /> Save
-          </Button>
+          <Subscribe
+            selector={(state) => [state.canSubmit, state.isDefaultValue]}
+            children={([canSubmit, isDefaultValue]) => (
+              <Button disabled={isDefaultValue || !canSubmit} type="submit">
+                <SaveIcon /> Save
+              </Button>
+            )}
+          />
         </div>
       </div>
       <Tabs defaultValue="status">
@@ -121,25 +113,35 @@ function FeatureComponent() {
         </TabsList>
         <TabsContent value="status">
           <div className="flex flex-col gap-4 mt-4">
-            <div className="grid grid-cols-12 items-start">
-              <Label htmlFor="values" className="col-span-2">
-                Default value
-              </Label>
-              <div className="grid grid-rows-2 col-span-10">
-                <Switch
-                  id="enabled"
-                  checked={defaultFeatureValue}
-                  className="col-span-10"
-                  onCheckedChange={(checked) => setDefaultFeatureValue(checked)}
-                />
-                <div className="text-muted-foreground text-sm">
-                  Will return{" "}
-                  <span className="italic">
-                    {defaultFeatureValue ? "true" : "false"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Field
+              name="enabled"
+              children={(field) => {
+                return (
+                  <div className="grid grid-cols-12 items-start">
+                    <Label htmlFor={field.name} className="col-span-2">
+                      Default value
+                    </Label>
+                    <div className="grid grid-rows-2 col-span-10">
+                      <Switch
+                        id={field.name}
+                        name={field.name}
+                        checked={field.state.value}
+                        className="col-span-10"
+                        onCheckedChange={(checked) =>
+                          field.handleChange(checked)
+                        }
+                      />
+                      <div className="text-muted-foreground text-sm">
+                        Will return{" "}
+                        <span className="italic">
+                          {field.state.value ? "true" : "false"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
+            ></Field>
             <div className="grid grid-cols-12">
               <Label className="col-span-2">Created on</Label>
               <Label className="col-span-10">{getUITime(data.createdAt)}</Label>
@@ -152,54 +154,99 @@ function FeatureComponent() {
             <Label>
               You can define key, values below to allow for some key based flags
             </Label>
-            <div className="grid grid-cols-12">
-              <Label htmlFor="key" className="col-span-2">
-                Key
-              </Label>
-              <Input
-                id="key"
-                placeholder="Enter a key"
-                className="col-span-10"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-12">
-              <Label htmlFor="values" className="col-span-2">
-                Values
-              </Label>
-              <TagsInput
-                id="values"
-                className="col-span-10 bg-transparent"
-                value={tags}
-                onChange={(tags) => setTags(tags)}
-              />
-            </div>
-            <div className="grid grid-cols-12 items-start">
-              <Label htmlFor="values" className="col-span-2">
-                Status
-              </Label>
-              <div className="grid grid-rows-2 col-span-10">
-                <Switch
-                  id="enabled"
-                  checked={jsonValueEnabled}
-                  className="col-span-10"
-                  onCheckedChange={(checked) => setJsonValueEnabled(checked)}
-                />
-                <div className="text-muted-foreground text-sm">
-                  Will return{" "}
-                  <span className="italic">
-                    {jsonValueEnabled ? "true" : "false"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Field
+              name="jsonValue.key"
+              validators={{
+                onChange: ({ value }) =>
+                  !value
+                    ? "Key is required"
+                    : value.length < 3
+                      ? "Key must be atleast 3 characters"
+                      : undefined,
+                onChangeAsyncDebounceMs: 500,
+              }}
+              children={(field) => {
+                return (
+                  <>
+                    <div className="grid grid-cols-12">
+                      <Label htmlFor={field.name} className="col-span-2">
+                        Key
+                      </Label>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        placeholder="Enter a key"
+                        className="col-span-10"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    </div>
+                    <FieldInfo field={field} />
+                  </>
+                );
+              }}
+            ></Field>
+            <Field
+              name="jsonValue.values"
+              children={(field) => {
+                return (
+                  <div className="grid grid-cols-12">
+                    <Label htmlFor={field.name} className="col-span-2">
+                      Values
+                    </Label>
+                    <TagsInput
+                      id={field.name}
+                      name={field.name}
+                      className="col-span-10 bg-transparent"
+                      value={field.state.value.map((v) => {
+                        return {
+                          id: v,
+                          name: v,
+                        };
+                      })}
+                      onChange={(tags) =>
+                        field.handleChange(tags.map((tag) => tag.name))
+                      }
+                    />
+                  </div>
+                );
+              }}
+            ></Field>
+            <Field
+              name="jsonValue.enabled"
+              children={(field) => {
+                return (
+                  <div className="grid grid-cols-12 items-start">
+                    <Label htmlFor={field.name} className="col-span-2">
+                      Status
+                    </Label>
+                    <div className="grid grid-rows-2 col-span-10">
+                      <Switch
+                        id={field.name}
+                        name={field.name}
+                        checked={field.state.value}
+                        className="col-span-10"
+                        onCheckedChange={(checked) =>
+                          field.handleChange(checked)
+                        }
+                      />
+                      <div className="text-muted-foreground text-sm">
+                        Will return{" "}
+                        <span className="italic">
+                          {field.state.value ? "true" : "false"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
+            ></Field>
           </div>
         </TabsContent>
         <TabsContent value="configuration">
           <div className="flex flex-col gap-2"></div>
         </TabsContent>
       </Tabs>
-    </>
+    </form>
   );
 }

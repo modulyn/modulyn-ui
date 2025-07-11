@@ -17,11 +17,16 @@ import { useState } from "react";
 type NewFeatureProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  environmentId: string;
 };
 
-export function NewFeature({ open, onOpenChange }: NewFeatureProps) {
-  const { projectId, environmentId } = useParams({
-    from: "/projects/$projectId/environments/$environmentId/features/",
+export function NewFeature({
+  open,
+  onOpenChange,
+  environmentId,
+}: NewFeatureProps) {
+  const { projectId } = useParams({
+    from: "/projects/$projectId/",
   });
   const { mutate: createFeature } = featureCreateMutation(
     projectId,

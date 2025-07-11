@@ -1,6 +1,4 @@
 import { Feature, FeaturesTable } from "@/components/features-table";
-import { NewEnvironment } from "@/components/new-environment";
-import { NewFeature } from "@/components/new-feature";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -103,19 +101,6 @@ function FeaturesComponent() {
         </TabsContent>
         <TabsContent value="targeting">targeting</TabsContent>
       </Tabs>
-      {openNewEnvironment && (
-        <NewEnvironment
-          open={openNewEnvironment}
-          onOpenChange={() => setOpenNewEnvironment(!openNewEnvironment)}
-        />
-      )}
-
-      {openNewFeature && (
-        <NewFeature
-          open={openNewFeature}
-          onOpenChange={() => setOpenNewFeature(!openNewFeature)}
-        />
-      )}
     </>
   );
 }

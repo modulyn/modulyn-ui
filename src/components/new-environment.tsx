@@ -22,7 +22,7 @@ type NewEnvironmentProps = {
 export function NewEnvironment({ open, onOpenChange }: NewEnvironmentProps) {
   const navigate = useNavigate();
   const { projectId } = useParams({
-    from: "/projects/$projectId/environments/$environmentId/features/",
+    from: "/projects/$projectId/",
   });
   const { mutate: createEnvironment } = environmentCreateMutation(
     projectId,

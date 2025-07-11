@@ -8,42 +8,27 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useRouterState,
-} from "@tanstack/react-router";
+import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import { Command, PlusIcon } from "lucide-react";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { Collapsible } from "@/components/ui/collapsible";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Skeleton } from "./ui/skeleton";
 import { useEffect, useState } from "react";
 import { projectsQueryOptions } from "@/services/projects";
-import { environmentsQueryOptions } from "@/services/environments";
 import { NewProject } from "./new-project";
 
 export function AppSidebar() {
-  const [openNewProject, setOpenNewProject] = useState(false);
   const navigate = useNavigate();
-  const { projectId, environmentId } = useParams({
+  const [openNewProject, setOpenNewProject] = useState(false);
+  const { projectId } = useParams({
     strict: false,
   });
   const router = useRouterState();
   const [selectedProject, setSelectedProject] = useState<string>("");
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
   const { data: projects, isPending: isProjectsPending } = useSuspenseQuery(
     projectsQueryOptions()
   );
-  const {
-    data: environments,
-    isPending: isEnvironmentsPending,
-    refetch: fetchEnvironments,
-  } = useQuery(environmentsQueryOptions(selectedProject));
 
   useEffect(() => {
     if (router.location.pathname === "/") {
@@ -52,37 +37,10 @@ export function AppSidebar() {
   }, [router.location.pathname]);
 
   useEffect(() => {
-    if (selectedProject) {
-      fetchEnvironments();
-    }
-  }, [selectedProject]);
-
-  useEffect(() => {
-    if (
-      !projectId &&
-      !environmentId &&
-      projects &&
-      projects.length > 0 &&
-      environments &&
-      environments.length > 0
-    ) {
+    if (!projectId && projects && projects.length > 0) {
       setSelectedProject(projects[0].id);
-      setSelectedEnvironment(environments[0].id);
-      navigate({
-        to: "/projects/$projectId/environments/$environmentId/features",
-        params: {
-          projectId: projects[0].id,
-          environmentId: environments[0].id,
-        },
-      });
     }
-  }, [projectId, environmentId, projects, environments]);
-
-  useEffect(() => {
-    if (environmentId) {
-      setSelectedEnvironment(environmentId);
-    }
-  }, [environmentId]);
+  }, [projectId, projects]);
 
   useEffect(() => {
     if (projectId) {
@@ -90,26 +48,20 @@ export function AppSidebar() {
     }
   }, [projectId]);
 
-  const handleSelectSidebarItem = (
-    newProjectId: string,
-    newEnvironmentId?: string
-  ) => {
-    let envToRedirectTo = "";
-    if (!newEnvironmentId) {
-      envToRedirectTo = `sdk-${newProjectId}`;
-    } else {
-      envToRedirectTo = newEnvironmentId;
-    }
+  const handleSelectSidebarItem = (newProjectId: string) => {
     setSelectedProject(newProjectId);
-    setSelectedEnvironment(envToRedirectTo);
-    navigate({
-      to: "/projects/$projectId/environments/$environmentId/features",
-      params: {
-        projectId: newProjectId,
-        environmentId: envToRedirectTo,
-      },
-    });
   };
+
+  useEffect(() => {
+    if (selectedProject) {
+      navigate({
+        to: "/projects/$projectId",
+        params: {
+          projectId: selectedProject,
+        },
+      });
+    }
+  }, [selectedProject]);
 
   return (
     <Sidebar variant="floating" collapsible="offcanvas">
@@ -164,50 +116,6 @@ export function AppSidebar() {
                     >
                       <span>{project.name}</span>
                     </SidebarMenuButton>
-                    <CollapsibleContent>
-                      <SidebarGroup>
-                        <SidebarGroupLabel>Environments</SidebarGroupLabel>
-                        <SidebarMenuSub>
-                          {isEnvironmentsPending && (
-                            <div className="flex flex-col gap-2">
-                              <Skeleton className="h-6"></Skeleton>
-                              <Skeleton className="h-6"></Skeleton>
-                              <Skeleton className="h-6"></Skeleton>
-                              <Skeleton className="h-6"></Skeleton>
-                              <Skeleton className="h-6"></Skeleton>
-                            </div>
-                          )}
-                          {environments &&
-                            environments.length > 0 &&
-                            environments.map((environment) => (
-                              <SidebarMenuSubItem key={environment.id}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={
-                                    environment.id === selectedEnvironment
-                                  }
-                                  onClick={() =>
-                                    handleSelectSidebarItem(
-                                      project.id,
-                                      environment.id
-                                    )
-                                  }
-                                >
-                                  <Link
-                                    to="/projects/$projectId/environments/$environmentId/features"
-                                    params={{
-                                      projectId: selectedProject,
-                                      environmentId: environment.id,
-                                    }}
-                                  >
-                                    <span>{environment.name}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                        </SidebarMenuSub>
-                      </SidebarGroup>
-                    </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
               ))}

@@ -29,21 +29,18 @@ export type JsonValueType = {
 };
 
 // get features
-const fetchFeatures = async (projectId: string, environmentId: string) => {
+const fetchFeatures = async (projectId: string) => {
   return axios
     .get<
       ResponseArray<FeatureType>
-    >(`http://localhost:8080/api/v1/projects/${projectId}/environments/${environmentId}/features`)
+    >(`http://localhost:8080/api/v1/projects/${projectId}/features`)
     .then((r) => r.data.data);
 };
 
-export const featuresQueryOptions = (
-  projectId: string,
-  environmentId: string
-) =>
+export const featuresQueryOptions = (projectId: string) =>
   queryOptions({
-    queryKey: ["features", projectId, environmentId],
-    queryFn: () => fetchFeatures(projectId, environmentId),
+    queryKey: ["features", projectId],
+    queryFn: () => fetchFeatures(projectId),
   });
 
 // update feature

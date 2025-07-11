@@ -41,7 +41,6 @@ export const projectCreateMutation = (navigate: UseNavigateResult<string>) =>
     mutationFn: (input: CreateProjectType) => createProject(input),
     onSuccess: (data, variables) => {
       const projectId = data.data.data;
-      const environmentId = `sdk-${projectId}`;
       queryClient.invalidateQueries({
         queryKey: ["projects"],
       });
@@ -49,10 +48,9 @@ export const projectCreateMutation = (navigate: UseNavigateResult<string>) =>
         description: `Project ${variables.name} created successfully`,
       });
       navigate({
-        to: "/projects/$projectId/environments/$environmentId/features",
+        to: "/projects/$projectId",
         params: {
           projectId: projectId,
-          environmentId: environmentId,
         },
       });
     },

@@ -14,3 +14,20 @@ export function getUITime(time: string) {
   };
   return new Date(time).toLocaleTimeString([], options);
 }
+
+export function groupBy<T, K extends keyof any>(
+  list: T[],
+  getKey: (item: T) => K
+): Record<K, T[]> {
+  return list.reduce(
+    (accumulator, currentItem) => {
+      const groupKey = getKey(currentItem);
+      if (!accumulator[groupKey]) {
+        accumulator[groupKey] = [];
+      }
+      accumulator[groupKey].push(currentItem);
+      return accumulator;
+    },
+    {} as Record<K, T[]>
+  );
+}

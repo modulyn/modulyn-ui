@@ -4,13 +4,18 @@ import { ResponseArray, Response } from "./response-type";
 import { queryClient } from "@/main";
 import { toast } from "sonner";
 
-type FeatureType = {
+export type FeatureType = {
   id: string;
   name: string;
   enabled: boolean;
   jsonValue: JsonValueType;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string;
+  environmentId: string;
+  projectId: string;
+  environmentName: string;
+  projectName: string;
 };
 
 type UpdateFeatureType = {

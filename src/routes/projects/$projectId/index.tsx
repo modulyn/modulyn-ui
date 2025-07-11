@@ -1,8 +1,11 @@
+import { Feature, FeaturesTable } from "@/components/features-table";
 import { NewEnvironment } from "@/components/new-environment";
 import { NewFeature } from "@/components/new-feature";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { groupBy } from "@/lib/utils";
 import { featuresQueryOptions } from "@/services/features";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -67,10 +70,39 @@ function FeaturesComponent() {
   const [openNewFeature, setOpenNewFeature] = useState(false);
   const { projectId } = Route.useParams();
   const { data: features } = useSuspenseQuery(featuresQueryOptions(projectId));
-  console.log("Features:", features);
+
+  const getFeatureTableData = (): Feature[] => {
+    if (!features) return [];
+
+    const featuresToReturn: Feature[] = [];
+    const groupedFeatures = groupBy(features, (feature) => feature.id);
+    Object.entries(groupedFeatures).forEach(([id, featureGroup]) => {
+      const environments = featureGroup.map(
+        (feature) => feature.environmentName
+      );
+      featuresToReturn.push({
+        id: id,
+        name: featureGroup[0].name,
+        environments: environments,
+      });
+    });
+
+    return featuresToReturn;
+  };
 
   return (
     <>
+      <span className="text-2xl">{features?.at(0)?.projectName}</span>
+      <Tabs defaultValue="features">
+        <TabsList>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="targeting">Targeting</TabsTrigger>
+        </TabsList>
+        <TabsContent value="features">
+          <FeaturesTable data={getFeatureTableData()} />
+        </TabsContent>
+        <TabsContent value="targeting">targeting</TabsContent>
+      </Tabs>
       {openNewEnvironment && (
         <NewEnvironment
           open={openNewEnvironment}

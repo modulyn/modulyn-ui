@@ -25,6 +25,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useProjects } from "@/core/hooks/use-projects";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Menu items.
 const items = [
@@ -56,23 +58,41 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { data, isLoading } = useProjects();
   return (
     <Sidebar variant="floating">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {isLoading ? (
+                <>
+                  <SidebarMenuItem>
+                    <Skeleton className="w-full h-6" />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Skeleton className="w-full h-6" />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Skeleton className="w-full h-6" />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Skeleton className="w-full h-6" />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Skeleton className="w-full h-6" />
+                  </SidebarMenuItem>
+                </>
+              ) : (
+                data?.map((d: any) => (
+                  <SidebarMenuItem key={d.id}>
+                    <SidebarMenuButton asChild>
+                      <div>{d.name}</div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

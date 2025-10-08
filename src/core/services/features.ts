@@ -2,6 +2,7 @@ import axios from "axios";
 import type { Feature } from "../models/feature";
 import type { Response } from "../models/response";
 import type { FeatureDetail } from "../models/feature-detail";
+import type { UpdateFeatureRequest } from "../models/update-feature-request";
 
 export class FeaturesService {
   async getFeaturesForProject(
@@ -41,7 +42,24 @@ export class FeaturesService {
 
       return featureDetails;
     } catch (error) {
-      console.error("Failed to fetch environments:", error);
+      console.error("Failed to fetch features:", error);
+    }
+  }
+
+  updateFeatures(
+    projectId: string,
+    featureId: string,
+    updatedFeatures: UpdateFeatureRequest[]
+  ) {
+    try {
+      return axios
+        .put(
+          `http://localhost:8080/api/v1/projects/${projectId}/features/${featureId}`,
+          [...updatedFeatures]
+        )
+        .then((res) => res.data.data);
+    } catch (error) {
+      console.error("Failed to update features:", error);
     }
   }
 }

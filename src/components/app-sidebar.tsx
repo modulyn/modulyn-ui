@@ -40,6 +40,8 @@ export function AppSidebar() {
     mutate: createProject,
     isError: isCreateProjectError,
     error: createProjectError,
+    isSuccess: isCreateProjectSuccess,
+    data: createdProjectId,
   } = useCreateProject();
 
   const projectIdFromUrl = location.pathname.split("/")[2];
@@ -73,14 +75,23 @@ export function AppSidebar() {
     }
   }, [isCreateProjectError]);
 
+  useEffect(() => {
+    if (isCreateProjectSuccess && createdProjectId) {
+      navigate(`/projects/${createdProjectId}`);
+    }
+  }, [isCreateProjectSuccess, createdProjectId, navigate]);
+
   return (
     <>
       <Sidebar variant="floating">
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>Projects</SidebarGroupLabel>
-            <SidebarGroupAction title="Add Project">
-              <Plus onClick={() => setCreateProjectDialogOpen(true)} />{" "}
+            <SidebarGroupAction
+              title="Add Project"
+              onClick={() => setCreateProjectDialogOpen(true)}
+            >
+              <Plus />
               <span className="sr-only">Add Project</span>
             </SidebarGroupAction>
             <SidebarGroupContent>

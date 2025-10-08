@@ -1,12 +1,4 @@
-import {
-  Calendar,
-  ChevronUp,
-  Home,
-  Inbox,
-  Search,
-  Settings,
-  User2,
-} from "lucide-react";
+import { ChevronUp, User2 } from "lucide-react";
 
 import {
   Sidebar,
@@ -27,38 +19,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useProjects } from "@/core/hooks/use-projects";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { data, isLoading } = useProjects();
+
+  const projectIdFromUrl = location.pathname.split("/")[2];
+
+  useEffect(() => {
+    if (!isLoading && data && data.length > 0 && !projectIdFromUrl) {
+      navigate(`/projects/${data[0].id}`);
+    }
+  }, [data, isLoading, projectIdFromUrl, navigate]);
+
   return (
     <Sidebar variant="floating">
       <SidebarContent>
@@ -86,8 +62,14 @@ export function AppSidebar() {
                 </>
               ) : (
                 data?.map((d: any) => (
-                  <SidebarMenuItem key={d.id}>
-                    <SidebarMenuButton asChild>
+                  <SidebarMenuItem
+                    key={d.id}
+                    onClick={() => navigate(`/projects/${d.id}`)}
+                  >
+                    <SidebarMenuButton
+                      asChild
+                      isActive={d.id === projectIdFromUrl}
+                    >
                       <div>{d.name}</div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

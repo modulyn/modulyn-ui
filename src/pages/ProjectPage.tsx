@@ -1,3 +1,4 @@
+import { FeatureDetail } from "@/components/feature-detail";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,11 +19,11 @@ import { useNavigate, useParams } from "react-router";
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState<"features" | "targeting">(
+  const [selectedTab, setSelectedTab] = useState<"features" | "targetings">(
     "features"
   );
   const { data: environments, isLoading: isLoadingEnvironments } =
-    useEnvironments(selectedTab === "targeting", projectId);
+    useEnvironments(selectedTab === "targetings", projectId);
   const { data: features, isLoading: isLoadingFeatures } = useFeaturesOfProject(
     selectedTab === "features",
     projectId
@@ -47,9 +48,12 @@ export default function ProjectPage() {
 
   return (
     <div>
-      <p className="scroll-m-20 text-sm font-semibold tracking-tight text-muted-foreground pb-2">
-        Project
-      </p>
+      <div className="flex flex-row w-full justify-between items-center">
+        <p className="scroll-m-20 text-sm font-semibold tracking-tight text-muted-foreground pb-2 flex-4">
+          Project
+        </p>
+        <Input className="flex-1" placeholder={`Search ${selectedTab}`} />
+      </div>
       <div>
         <h3 className="scroll-m-20 pb-4 text-2xl font-semibold tracking-tight first:mt-0">
           {projectId}
@@ -65,40 +69,21 @@ export default function ProjectPage() {
               Features
             </TabsTrigger>
             <TabsTrigger
-              value="targeting"
-              onClick={() => setSelectedTab("targeting")}
+              value="targetings"
+              onClick={() => setSelectedTab("targetings")}
             >
-              Targeting
+              Targetings
             </TabsTrigger>
           </TabsList>
           <TabsContent value="features">
-            <Card>
-              <CardHeader>
-                <CardTitle>Features</CardTitle>
-                <CardDescription>
-                  Make changes to your account here. Click save when you&apos;re
-                  done.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-name">Name</Label>
-                  <Input id="tabs-demo-name" defaultValue="Pedro Duarte" />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-username">Username</Label>
-                  <Input id="tabs-demo-username" defaultValue="@peduarte" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button>Save changes</Button>
-              </CardFooter>
-            </Card>
+            {features?.map((feature) => (
+              <FeatureDetail key={feature.id} data={feature} />
+            ))}
           </TabsContent>
-          <TabsContent value="targeting">
+          <TabsContent value="targetings">
             <Card>
               <CardHeader>
-                <CardTitle>Targeting</CardTitle>
+                <CardTitle>Targetings</CardTitle>
                 <CardDescription>
                   Change your password here. After saving, you&apos;ll be logged
                   out.

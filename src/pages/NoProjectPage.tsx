@@ -11,20 +11,31 @@ import {
 } from "@/components/ui/empty";
 import { useCreateProject } from "@/core/hooks/use-create-project";
 import { IconFolderCode } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function NoProjectPage() {
   const [open, setOpen] = useState(false);
-  const { mutate: createProject } = useCreateProject();
+  const {
+    mutate: createProject,
+    isError: isCreateProjectError,
+    error: createProjectError,
+  } = useCreateProject();
 
   const handleCreate = (projectName: string) => {
     if (!projectName.trim()) return;
-    console.log("Creating project:", projectName);
     createProject(projectName);
 
     // After creation, close the dialog and reset the form
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (isCreateProjectError) {
+      console.error(createProjectError);
+      toast.error("Error creating project");
+    }
+  }, [isCreateProjectError]);
 
   return (
     <>

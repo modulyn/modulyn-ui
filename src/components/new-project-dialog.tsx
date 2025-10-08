@@ -30,6 +30,7 @@ export function NewProjectDialog(props: NewProjectDialogProps) {
           onSubmit={(e) => {
             e.preventDefault();
             handleCreate(projectName);
+            setProjectName("");
           }}
           className="space-y-4"
         >

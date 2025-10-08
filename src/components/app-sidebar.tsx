@@ -24,21 +24,31 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCreateProject } from "@/core/hooks/use-create-project";
 import { NewProjectDialog } from "./new-project-dialog";
+import { toast } from "sonner";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data, isLoading } = useProjects();
+  const {
+    data: projects,
+    isLoading,
+    isError: isProjectsError,
+    error: projectsError,
+  } = useProjects();
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
-  const { mutate: createProject } = useCreateProject();
+  const {
+    mutate: createProject,
+    isError: isCreateProjectError,
+    error: createProjectError,
+  } = useCreateProject();
 
   const projectIdFromUrl = location.pathname.split("/")[2];
 
   useEffect(() => {
-    if (!isLoading && data && data.length > 0 && !projectIdFromUrl) {
-      navigate(`/projects/${data[0].id}`);
+    if (!isLoading && projects && projects.length > 0 && !projectIdFromUrl) {
+      navigate(`/projects/${projects[0].id}`);
     }
-  }, [data, isLoading, projectIdFromUrl, navigate]);
+  }, [projects, isLoading, projectIdFromUrl, navigate]);
 
   const handleCreateProject = (projectName: string) => {
     if (!projectName.trim()) return;
@@ -48,6 +58,20 @@ export function AppSidebar() {
     // After creation, close the dialog and reset the form
     setCreateProjectDialogOpen(false);
   };
+
+  useEffect(() => {
+    if (isProjectsError) {
+      console.error(projectsError);
+      toast.error("Error loading projects");
+    }
+  }, [isProjectsError]);
+
+  useEffect(() => {
+    if (isCreateProjectError) {
+      console.error(createProjectError);
+      toast.error("Error creating project");
+    }
+  }, [isCreateProjectError]);
 
   return (
     <>
@@ -80,7 +104,7 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                   </>
                 ) : (
-                  data?.map((d: any) => (
+                  projects?.map((d: any) => (
                     <SidebarMenuItem
                       key={d.id}
                       onClick={() => navigate(`/projects/${d.id}`)}

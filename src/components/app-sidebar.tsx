@@ -1,10 +1,11 @@
-import { ChevronUp, User2 } from "lucide-react";
+import { ChevronUp, Plus, User2 } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
@@ -19,13 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useProjects } from "@/core/hooks/use-projects";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCreateProject } from "@/core/hooks/use-create-project";
+import { NewProjectDialog } from "./new-project-dialog";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { data, isLoading } = useProjects();
+  const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+  const { mutate: createProject } = useCreateProject();
 
   const projectIdFromUrl = location.pathname.split("/")[2];
 
@@ -35,78 +40,98 @@ export function AppSidebar() {
     }
   }, [data, isLoading, projectIdFromUrl, navigate]);
 
+  const handleCreateProject = (projectName: string) => {
+    if (!projectName.trim()) return;
+    console.log("Creating project:", projectName);
+    createProject(projectName);
+
+    // After creation, close the dialog and reset the form
+    setCreateProjectDialogOpen(false);
+  };
+
   return (
-    <Sidebar variant="floating">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {isLoading ? (
-                <>
-                  <SidebarMenuItem>
-                    <Skeleton className="w-full h-6" />
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Skeleton className="w-full h-6" />
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Skeleton className="w-full h-6" />
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Skeleton className="w-full h-6" />
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Skeleton className="w-full h-6" />
-                  </SidebarMenuItem>
-                </>
-              ) : (
-                data?.map((d: any) => (
-                  <SidebarMenuItem
-                    key={d.id}
-                    onClick={() => navigate(`/projects/${d.id}`)}
-                  >
-                    <SidebarMenuButton
-                      asChild
-                      isActive={d.id === projectIdFromUrl}
+    <>
+      <Sidebar variant="floating">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+            <SidebarGroupAction title="Add Project">
+              <Plus onClick={() => setCreateProjectDialogOpen(true)} />{" "}
+              <span className="sr-only">Add Project</span>
+            </SidebarGroupAction>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {isLoading ? (
+                  <>
+                    <SidebarMenuItem>
+                      <Skeleton className="w-full h-6" />
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Skeleton className="w-full h-6" />
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Skeleton className="w-full h-6" />
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Skeleton className="w-full h-6" />
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Skeleton className="w-full h-6" />
+                    </SidebarMenuItem>
+                  </>
+                ) : (
+                  data?.map((d: any) => (
+                    <SidebarMenuItem
+                      key={d.id}
+                      onClick={() => navigate(`/projects/${d.id}`)}
                     >
-                      <div>{d.name}</div>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User2 /> Username
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={d.id === projectIdFromUrl}
+                      >
+                        <div>{d.name}</div>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton>
+                    <User2 /> Username
+                    <ChevronUp className="ml-auto" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  className="w-[--radix-popper-anchor-width]"
+                >
+                  <DropdownMenuItem>
+                    <span>Account</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <span>Billing</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+      <NewProjectDialog
+        open={createProjectDialogOpen}
+        setOpen={setCreateProjectDialogOpen}
+        handleCreate={handleCreateProject}
+      />
+    </>
   );
 }

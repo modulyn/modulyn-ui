@@ -1,6 +1,7 @@
 export interface Feature {
   id: string;
   name: string;
+  description: string;
   enabled: boolean;
   createdAt: string;
   updatedAt: string;

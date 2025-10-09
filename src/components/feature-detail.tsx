@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -11,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import type { FeatureDetail } from "@/core/models/feature-detail";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateFeatures } from "@/core/hooks/use-update-features";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export interface FeatureDetailProps {
   data: FeatureDetail;
@@ -20,7 +20,12 @@ export interface FeatureDetailProps {
 
 export function FeatureDetail(props: FeatureDetailProps) {
   const { data: feature } = props;
-  const { mutate: updateFeatures } = useUpdateFeatures(feature.projectId);
+  const {
+    mutate: updateFeatures,
+    isSuccess: isUpdateFeaturesSuccess,
+    isError: isUpdateFeaturesError,
+    error: updateFeaturesError,
+  } = useUpdateFeatures(feature.projectId);
   const [currentFeatureValues, setCurrentFeatureValues] = useState<
     | {
         environmentId: string;
@@ -35,6 +40,19 @@ export function FeatureDetail(props: FeatureDetailProps) {
       };
     })
   );
+
+  useEffect(() => {
+    if (isUpdateFeaturesError) {
+      console.error(updateFeaturesError);
+      toast.error("Error updating feature");
+    }
+  }, [isUpdateFeaturesError]);
+
+  useEffect(() => {
+    if (isUpdateFeaturesSuccess) {
+      toast.success("Successfully updated feature");
+    }
+  }, [isUpdateFeaturesSuccess]);
 
   const handleCheckedChange = (checked: boolean, env: string) => {
     const clonedFeatureValues = [...currentFeatureValues];
@@ -66,9 +84,7 @@ export function FeatureDetail(props: FeatureDetailProps) {
     <Card className="mb-2">
       <CardHeader>
         <CardTitle>{feature.name}</CardTitle>
-        <CardDescription>
-          Make changes to your feature here. Click save when you&apos;re done.
-        </CardDescription>
+        <CardDescription>{feature.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center">

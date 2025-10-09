@@ -1,6 +1,7 @@
 export interface FeatureDetail {
   id: string;
   name: string;
+  description: string;
   projectId: string;
   projectName: string;
   environments: {

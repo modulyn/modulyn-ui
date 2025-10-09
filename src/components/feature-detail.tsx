@@ -109,7 +109,7 @@ export function FeatureDetail(props: FeatureDetailProps) {
   return (
     <Card className="mb-2">
       <CardHeader>
-        <CardTitle>{feature.name}</CardTitle>
+        <CardTitle>{feature.name} ({feature.label})</CardTitle>
         <CardDescription>{feature.description}</CardDescription>
         <CardAction>
           <Popover>

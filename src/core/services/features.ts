@@ -22,6 +22,7 @@ export class FeaturesService {
             detail = {
               id: feature.id,
               name: feature.name,
+              label: feature.label,
               description: feature.description,
               projectId: feature.projectId,
               projectName: feature.projectName,

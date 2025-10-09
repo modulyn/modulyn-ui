@@ -12,6 +12,7 @@ import type { FeatureDetail } from "@/core/models/feature-detail";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateFeatures } from "@/core/hooks/use-update-features";
 import { useState } from "react";
+import { CheckIcon } from "lucide-react";
 
 export interface FeatureDetailProps {
   data: FeatureDetail;
@@ -69,23 +70,26 @@ export function FeatureDetail(props: FeatureDetailProps) {
           Make changes to your feature here. Click save when you&apos;re done.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-row gap-2">
-        {feature.environments.map((env, i) => (
-          <div key={env.id} className="flex items-center space-x-2">
-            <Switch
-              id={env.id}
-              checked={currentFeatureValues[i].enabled}
-              onCheckedChange={(checked) =>
-                handleCheckedChange(checked, env.id)
-              }
-            />
-            <Label htmlFor={env.id}>{env.name}</Label>
-          </div>
-        ))}
+      <CardContent className="flex flex-row justify-between items-center">
+        <div className="flex flex-row gap-2 items-center">
+          {feature.environments.map((env, i) => (
+            <div key={env.id} className="flex items-center space-x-2">
+              <Switch
+                id={env.id}
+                checked={currentFeatureValues[i].enabled}
+                onCheckedChange={(checked) =>
+                  handleCheckedChange(checked, env.id)
+                }
+              />
+              <Label htmlFor={env.id}>{env.name}</Label>
+            </div>
+          ))}
+        </div>
+        <Button onClick={handleUpdate} className="cursor-pointer">
+          <CheckIcon />
+          Save changes
+        </Button>
       </CardContent>
-      <CardFooter>
-        <Button onClick={handleUpdate}>Save changes</Button>
-      </CardFooter>
     </Card>
   );
 }

@@ -6,15 +6,24 @@ import type { UpdateFeatureRequest } from "../models/update-feature-request";
 
 export class FeaturesService {
   async getFeaturesForProject(
-    projectId: string
+    projectId: string,
+    searchTerm: string
   ): Promise<FeatureDetail[] | undefined> {
     try {
+      let params = null;
+      if (searchTerm !== "") {
+        params = {
+          search: searchTerm,
+        };
+      }
       var features = await axios
         .get<Response<Feature[]>>(
-          `http://localhost:8080/api/v1/projects/${projectId}/features`
+          `http://localhost:8080/api/v1/projects/${projectId}/features`,
+          {
+            params: params,
+          }
         )
         .then((res) => res.data.data);
-      // Convert Feature[] to FeatureDetail[]
       const featureDetails: FeatureDetail[] = features.reduce(
         (acc, feature) => {
           let detail = acc.find((fd) => fd.id === feature.id);

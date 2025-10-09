@@ -23,12 +23,14 @@ export default function ProjectPage() {
   const [selectedTab, setSelectedTab] = useState<"features" | "targetings">(
     "features"
   );
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const { data: environments, isLoading: isLoadingEnvironments } =
     useEnvironments(selectedTab === "targetings", projectId);
-  const { data: features, isLoading: isLoadingFeatures } = useFeaturesOfProject(
-    selectedTab === "features",
-    projectId
-  );
+  const {
+    data: features,
+    isLoading: isLoadingFeatures,
+    refetch: fetchFeatures,
+  } = useFeaturesOfProject(selectedTab === "features", searchTerm, projectId);
 
   useEffect(() => {
     if (
@@ -47,13 +49,26 @@ export default function ProjectPage() {
     navigate,
   ]);
 
+  useEffect(() => {
+    if (searchTerm === "") {
+      fetchFeatures();
+    } else if (searchTerm.length > 2) {
+      fetchFeatures();
+    }
+  }, [searchTerm, fetchFeatures]);
+
   return (
     <div>
       <div className="flex flex-row w-full justify-between items-center">
         <p className="scroll-m-20 text-sm font-semibold tracking-tight text-muted-foreground pb-2 flex-4">
           Project
         </p>
-        <Input className="flex-1" placeholder={`Search ${selectedTab}`} />
+        <Input
+          className="flex-1"
+          placeholder={`Search ${selectedTab}`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
       <div>
         <h3 className="scroll-m-20 pb-4 text-2xl font-semibold tracking-tight first:mt-0">

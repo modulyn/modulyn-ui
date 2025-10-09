@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEnvironments } from "@/core/hooks/use-environments";
 import { useFeaturesOfProject } from "@/core/hooks/use-features-of-project";
@@ -76,6 +77,18 @@ export default function ProjectPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="features">
+            {isLoadingFeatures && (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            )}
             {features?.map((feature) => (
               <FeatureDetail key={feature.id} data={feature} />
             ))}

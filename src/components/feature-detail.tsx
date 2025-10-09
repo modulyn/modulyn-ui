@@ -1,5 +1,6 @@
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -11,8 +12,9 @@ import type { FeatureDetail } from "@/core/models/feature-detail";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateFeatures } from "@/core/hooks/use-update-features";
 import { useEffect, useState } from "react";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useDeleteFeature } from "@/core/hooks/use-delete-feature";
 
 export interface FeatureDetailProps {
   data: FeatureDetail;
@@ -26,6 +28,12 @@ export function FeatureDetail(props: FeatureDetailProps) {
     isError: isUpdateFeaturesError,
     error: updateFeaturesError,
   } = useUpdateFeatures(feature.projectId);
+  const {
+    mutate: deleteFeature,
+    isSuccess: isDeleteFeatureSuccess,
+    isError: isDeleteFeatureError,
+    error: deleteFeatureError,
+  } = useDeleteFeature(feature.projectId);
   const [currentFeatureValues, setCurrentFeatureValues] = useState<
     | {
         environmentId: string;
@@ -54,6 +62,19 @@ export function FeatureDetail(props: FeatureDetailProps) {
     }
   }, [isUpdateFeaturesSuccess]);
 
+  useEffect(() => {
+    if (isDeleteFeatureError) {
+      console.error(deleteFeatureError);
+      toast.error("Error deleting feature");
+    }
+  }, [isDeleteFeatureError]);
+
+  useEffect(() => {
+    if (isDeleteFeatureSuccess) {
+      toast.success("Successfully deleted feature");
+    }
+  }, [isDeleteFeatureSuccess]);
+
   const handleCheckedChange = (checked: boolean, env: string) => {
     const clonedFeatureValues = [...currentFeatureValues];
     const currentEnvIndex = clonedFeatureValues.findIndex(
@@ -68,15 +89,17 @@ export function FeatureDetail(props: FeatureDetailProps) {
   };
 
   const handleUpdate = () => {
-    console.log("toUpdate: ", {
-      projectId: feature.projectId,
-      featureId: feature.id,
-      updatedFeatures: currentFeatureValues,
-    });
     updateFeatures({
       projectId: feature.projectId,
       featureId: feature.id,
       updatedFeatures: currentFeatureValues,
+    });
+  };
+
+  const handleDelete = () => {
+    deleteFeature({
+      projectId: feature.projectId,
+      featureId: feature.id,
     });
   };
 
@@ -85,6 +108,16 @@ export function FeatureDetail(props: FeatureDetailProps) {
       <CardHeader>
         <CardTitle>{feature.name}</CardTitle>
         <CardDescription>{feature.description}</CardDescription>
+        <CardAction>
+          <Button
+            variant="destructive"
+            size="icon"
+            className="cursor-pointer"
+            onClick={handleDelete}
+          >
+            <TrashIcon />
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center">

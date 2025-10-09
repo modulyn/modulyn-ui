@@ -63,4 +63,16 @@ export class FeaturesService {
       console.error("Failed to update features:", error);
     }
   }
+
+  deleteFeature(projectId: string, featureId: string) {
+    try {
+      return axios
+        .delete(
+          `http://localhost:8080/api/v1/projects/${projectId}/features/${featureId}`
+        )
+        .then((res) => res.data.data);
+    } catch (error) {
+      console.error("Failed to delete feature:", error);
+    }
+  }
 }

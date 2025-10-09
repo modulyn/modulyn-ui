@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import { CheckIcon, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteFeature } from "@/core/hooks/use-delete-feature";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Input } from "./ui/input";
 
 export interface FeatureDetailProps {
   data: FeatureDetail;
@@ -22,6 +24,7 @@ export interface FeatureDetailProps {
 
 export function FeatureDetail(props: FeatureDetailProps) {
   const { data: feature } = props;
+  const [typedFeatureName, setTypedFeatureName] = useState<string>();
   const {
     mutate: updateFeatures,
     isSuccess: isUpdateFeaturesSuccess,
@@ -109,14 +112,38 @@ export function FeatureDetail(props: FeatureDetailProps) {
         <CardTitle>{feature.name}</CardTitle>
         <CardDescription>{feature.description}</CardDescription>
         <CardAction>
-          <Button
-            variant="destructive"
-            size="icon"
-            className="cursor-pointer"
-            onClick={handleDelete}
-          >
-            <TrashIcon />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="cursor-pointer"
+                // onClick={handleDelete}
+              >
+                <TrashIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="flex flex-col w-56 gap-2">
+              <div className="text-sm">
+                Type the name of the feature to delete
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="feature-name">Feature name</Label>
+                <Input
+                  id="feature-name"
+                  type="text"
+                  onChange={(e) => setTypedFeatureName(e.target.value)}
+                  value={typedFeatureName}
+                />
+              </div>
+              <Button
+                disabled={typedFeatureName !== feature.name}
+                onClick={handleDelete}
+              >
+                <TrashIcon /> Delete
+              </Button>
+            </PopoverContent>
+          </Popover>
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-row justify-between items-center">

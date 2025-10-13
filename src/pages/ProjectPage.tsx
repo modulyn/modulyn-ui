@@ -1,3 +1,4 @@
+import { AddFeatureDialog } from "@/components/add-feature-dialog";
 import { FeatureDetail } from "@/components/feature-detail";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCreateFeature } from "@/core/hooks/use-create-feature";
 import { useEnvironments } from "@/core/hooks/use-environments";
 import { useFeaturesOfProject } from "@/core/hooks/use-features-of-project";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -31,6 +34,12 @@ export default function ProjectPage() {
     isLoading: isLoadingFeatures,
     refetch: fetchFeatures,
   } = useFeaturesOfProject(selectedTab === "features", searchTerm, projectId);
+  const {
+    mutate: addFeature,
+    isSuccess: isCreateFeatureSuccess,
+    isError: isCreateFeatureError,
+    error: createFeatureError,
+  } = useCreateFeature();
 
   useEffect(() => {
     if (
@@ -57,22 +66,48 @@ export default function ProjectPage() {
     }
   }, [searchTerm, fetchFeatures]);
 
+  useEffect(() => {
+    if (isCreateFeatureSuccess) {
+      toast.success("Successfully created feature");
+    }
+  }, [isCreateFeatureSuccess]);
+
+  useEffect(() => {
+    if (isCreateFeatureError) {
+      console.error(createFeatureError);
+      toast.error("Error creating feature");
+    }
+  }, [isCreateFeatureError]);
+
+  const handleAdd = (name: string, description?: string) => {
+    if (projectId) {
+      addFeature({
+        name: name,
+        description: description,
+        projectId: projectId,
+      });
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-row w-full justify-between items-center">
         <p className="scroll-m-20 text-sm font-semibold tracking-tight text-muted-foreground pb-2 flex-4">
           Project
         </p>
-        <Input
-          className="flex-1"
-          placeholder={`Search ${selectedTab}`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="flex flex-row gap-2">
+          <AddFeatureDialog onAdd={handleAdd} />
+          <Input
+            className="flex-1"
+            placeholder={`Search ${selectedTab}`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
       <div>
         <h3 className="scroll-m-20 pb-4 text-2xl font-semibold tracking-tight first:mt-0">
-          {projectId}
+          {features?.[0].projectName}
         </h3>
       </div>
       <div className="flex w-full flex-col">

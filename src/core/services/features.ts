@@ -85,4 +85,17 @@ export class FeaturesService {
       console.error("Failed to delete feature:", error);
     }
   }
+
+  addFeature(name: string, projectId: string, description?: string) {
+    try {
+      return axios
+        .post(`http://localhost:8080/api/v1/projects/${projectId}/features`, {
+          name: name,
+          description: description,
+        })
+        .then((res) => res.data.data);
+    } catch (error) {
+      console.error("Failed to create features:", error);
+    }
+  }
 }
